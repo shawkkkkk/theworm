@@ -5,7 +5,7 @@
 # Then fetch the connectome (the README says where, ~1.1 GB, CC-BY, no account
 # needed) and run:  py build_graph.py
 
-numpy==2.4.2
+numpy>=2.3,<2.4
 scipy==1.17.1
 pandas==3.0.1
 pyarrow==23.0.1          # pandas needs it to read the .feather annotations
