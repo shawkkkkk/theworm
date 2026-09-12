@@ -131,7 +131,7 @@
       <button id="start">START</button>
       <input id="name" value="test" placeholder="name">
       <input id="ticker" value="test" placeholder="ticker">
-      <input id="desc" value="launched by a fruit fly connectome" placeholder="description">
+      <input id="desc" value="a real C. elegans connectome — paired with PFE, whose scientists used this worm to screen for Alzheimer's presenilin inhibitors" placeholder="description">
       <span class="grow"></span>
       <div class="steps" id="steps"></div>
     </div>
@@ -205,7 +205,7 @@ fetch('/status').then(r=>r.json()).then(s=>{
     : 'no wallet';
   if(s.venue){ document.querySelector('.hd .t').textContent='Live — '+s.venue; }
   if(s.chain){ document.querySelector('.brand .tag').textContent=
-    'Caenorhabditis elegans · ' + s.chain;
+    'Caenorhabditis elegans · ' + s.chain; }
   const m=$('mode');
   m.textContent = s.live ? 'LIVE — will mint' : 'DRY RUN';
   m.className = 'chip ' + (s.live ? 'live' : 'dry');
@@ -331,7 +331,7 @@ function baseline(on){
   if(on){ u.textContent='spontaneous baseline'; $('firing').style.opacity='.55';
           $('ncount').textContent='idle — spontaneous activity'; }
   else  { u.textContent='neurons firing';       $('firing').style.opacity='1';
-          $('ncount').textContent='0 of 302 — no 3D soma coordinates loaded yet';
+          $('ncount').textContent='0 of 302 — no 3D soma coordinates loaded yet'; }
 }
 
 let ws=null;
@@ -339,7 +339,7 @@ $('start').onclick=function(){
   $('start').disabled=true;$('idle').hidden=true;$('rec').classList.add('on');
   $('t-out').textContent='running';$('t-out').className='v';
   stage('wallet','on');
-  ws=new WebSocket('ws://'+location.host+'/run');
+  ws=new WebSocket((location.protocol==='https:'?'wss://':'ws://')+location.host+'/run');
   ws.onopen=function(){log('connected');ws.send(JSON.stringify({action:'start',
     name:$('name').value,ticker:$('ticker').value,desc:$('desc').value,
     trained:true,headful:false,steps:18}));};

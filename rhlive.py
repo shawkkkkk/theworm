@@ -36,8 +36,8 @@ from rhprovider import attach
 
 ROOT = Path(__file__).parent
 URL = "https://www.ponsfamily.com/launchpad/create"
-IMAGE = "assets/flycoin_square.png"
-PAIR = os.environ.get("FLY_RH_PAIR", "GOOGL")   # default on the page is ETH
+IMAGE = "assets/wormcoin_square.png"  # doesn't exist yet — image step will skip
+PAIR = os.environ.get("FLY_RH_PAIR", "PFE")   # default on the page is ETH
 X_HANDLE = os.environ.get("FLY_RH_X", "elonmusk")   # x.com/<handle> on the coin
 TAX_PCT = int(os.environ.get("FLY_RH_TAX", "2"))
 
