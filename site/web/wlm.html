@@ -62,18 +62,26 @@ h2{font-family:var(--serif);font-weight:400;font-size:clamp(44px,6vw,72px);line-
 .stage h3{font-family:var(--serif);font-size:29px;font-weight:400;line-height:1;margin-bottom:13px}
 .stage p{color:var(--dim);font-size:12px;margin:0}
 .stage:not(:last-child):after{content:"→";position:absolute;z-index:2;right:-13px;top:50%;width:25px;height:25px;display:grid;place-items:center;background:var(--amber);color:#09120d}
-.labgrid{display:grid;grid-template-columns:1.1fr .9fr;gap:28px;margin-top:40px}
-.chat{border:1px solid var(--line);background:var(--panel);min-height:460px;display:flex;flex-direction:column}
+.labgrid{display:grid;grid-template-columns:1.42fr .58fr;gap:1px;margin-top:40px;background:var(--line);border:1px solid var(--line)}
+.experience{background:var(--ground);min-width:0;display:flex;flex-direction:column}
 .chatbar{padding:13px 16px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px;color:var(--dim);font-size:11px}
 .dot{width:7px;height:7px;border-radius:50%;background:var(--red)}
 .chatbar span:last-child{margin-left:auto;color:var(--red)}
-.messages{padding:27px;display:flex;flex-direction:column;gap:22px;flex:1}
-.message{max-width:82%;padding:15px 17px;border:1px solid var(--line);color:var(--dim)}
+.wormroom{height:440px;position:relative;overflow:hidden;background:radial-gradient(circle at 50% 48%,rgba(198,255,109,.07),transparent 48%)}
+#talk-worm{width:100%;height:100%;display:block}
+.roomlabel{position:absolute;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint)}
+.roomlabel.tl{left:17px;top:15px}.roomlabel.tr{right:17px;top:15px;text-align:right}.roomlabel.bl{left:17px;bottom:15px}.roomlabel.br{right:17px;bottom:15px;text-align:right}
+.messages{padding:20px;display:flex;flex-direction:column;gap:15px;border-top:1px solid var(--line)}
+.message{max-width:90%;padding:13px 15px;border:1px solid var(--line);color:var(--dim)}
 .message.wlm{align-self:flex-start;border-left:2px solid var(--amber)}
 .message .who{color:var(--amber);font-size:10px;letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px}
 .composer{display:flex;border-top:1px solid var(--line);padding:15px;gap:10px}
-.composer input{flex:1;min-width:0;background:#090806;border:1px solid var(--line);padding:12px 13px;color:var(--faint);font:inherit}
-.composer button{border:0;background:#28231a;color:#625b4d;padding:0 18px;font:inherit;cursor:not-allowed}
+.composer input{flex:1;min-width:0;background:#07110d;border:1px solid var(--line);padding:12px 13px;color:var(--faint);font:inherit}
+.composer button{border:0;background:#203a2d;color:#687564;padding:0 18px;font:inherit;cursor:not-allowed}
+.telemetry{background:var(--panel);padding:23px;min-width:0}
+.telemetry-stat{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line);border:1px solid var(--line);margin:22px 0}
+.telemetry-stat div{background:var(--panel);padding:15px}.telemetry-stat b{display:block;font-family:var(--serif);font-size:30px;font-weight:300;color:var(--ink)}.telemetry-stat span{font-size:8px;color:var(--faint);letter-spacing:.09em;text-transform:uppercase}
+.signalpath{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:18px 0 26px;font-size:8px;color:var(--faint);letter-spacing:.07em;text-transform:uppercase}.signalpath span{border:1px solid var(--line);padding:6px}.signalpath b{color:var(--green);font-weight:400}
 .statuslist{border-top:1px solid var(--line)}
 .statusrow{display:grid;grid-template-columns:24px 1fr auto;gap:12px;padding:17px 0;border-bottom:1px solid var(--line);align-items:center}
 .statusrow .mark{color:var(--green)}
@@ -90,7 +98,7 @@ footer .wrap{display:flex;justify-content:space-between;gap:30px;flex-wrap:wrap}
   .stage{min-height:0}
   .stage .n{margin-bottom:22px}
   .stage:not(:last-child):after{content:"↓";right:24px;top:auto;bottom:-13px}
-  .labgrid{grid-template-columns:1fr}
+  .labgrid{grid-template-columns:1fr}.wormroom{height:380px}
 }
 @media(max-width:520px){.wrap{width:min(100% - 24px,1120px)}.crumb{display:none}h1{font-size:64px}.state{font-size:9px}.message{max-width:100%}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
@@ -149,24 +157,35 @@ footer .wrap{display:flex;justify-content:space-between;gap:30px;flex-wrap:wrap}
   </section>
 
   <section class="block">
-    <div class="eyebrow">Chat laboratory</div>
-    <h2>No fake demo.</h2>
-    <p class="plain">The interface is ready to receive a real inference backend. It will remain disabled until an adapter has been trained, evaluated against controls, and published with a reproducible manifest.</p>
+    <div class="eyebrow">Embodied conversation laboratory</div>
+    <h2>Talk to it. Watch it move. Hear what comes back.</h2>
+    <p class="plain">That is the target experience: your message becomes a token-by-token stimulus, the 302-node activity changes the worm’s visible body state, and the trained adapter produces the reply. The shell is ready; Send remains locked until the real inference path exists.</p>
     <div class="labgrid">
-      <div class="chat" aria-label="Disabled Worm Language Model chat preview">
-        <div class="chatbar"><span class="dot"></span><span>WLM / LOCAL INFERENCE</span><span>NOT DEPLOYED</span></div>
+      <div class="experience" aria-label="Disabled embodied Worm Language Model preview">
+        <div class="chatbar"><span class="dot"></span><span>SPECIMEN W-001 / CONVERSATION CHAMBER</span><span>OFFLINE</span></div>
+        <div class="wormroom">
+          <canvas id="talk-worm" aria-label="Animated preview of the Worm Language Model specimen"></canvas>
+          <span class="roomlabel tl">organism state<br>standby</span>
+          <span class="roomlabel tr">302-node reservoir<br>not connected</span>
+          <span class="roomlabel bl">movement preview<br>illustrative</span>
+          <span class="roomlabel br">activity appears here<br>during real inference</span>
+        </div>
         <div class="messages">
           <div class="message wlm">
             <div class="who">WLM system</div>
-            The 302-node reservoir is verified. I cannot generate a real reply yet because the language adapter has not been trained.
+            Reservoir verified. I can move in standby, but I cannot truthfully talk back until the language adapter has been trained.
           </div>
         </div>
         <div class="composer">
-          <input disabled value="Chat unlocks after training and evaluation" aria-label="Chat unavailable">
+          <input disabled value="What would you ask a worm? · unlocks after evaluation" aria-label="Chat unavailable">
           <button disabled>SEND</button>
         </div>
       </div>
-      <div>
+      <aside class="telemetry">
+        <div class="eyebrow">Neural activity</div>
+        <h3 style="font-family:var(--serif);font-size:30px;font-weight:300;margin-bottom:8px">Inside a very small nervous system</h3>
+        <div class="telemetry-stat"><div><b>302</b><span>neural nodes</span></div><div><b>4,809</b><span>edge records / pairs</span></div></div>
+        <div class="signalpath"><span>message</span><b>→</b><span>tokens</span><b>→</b><span>worm</span><b>→</b><span>reply</span></div>
         <div class="eyebrow">Build status</div>
         <div class="statuslist">
           <div class="statusrow"><span class="mark">✓</span><span>Cook 2019 graph loader</span><span class="tag">VERIFIED</span></div>
@@ -177,7 +196,7 @@ footer .wrap{display:flex;justify-content:space-between;gap:30px;flex-wrap:wrap}
           <div class="statusrow wait"><span class="mark">○</span><span>Held-out evaluation</span><span class="tag">WAITING</span></div>
           <div class="statusrow wait"><span class="mark">○</span><span>Public inference service</span><span class="tag">WAITING</span></div>
         </div>
-      </div>
+      </aside>
     </div>
   </section>
 </main>
@@ -191,52 +210,62 @@ footer .wrap{display:flex;justify-content:space-between;gap:30px;flex-wrap:wrap}
 
 <script>
 (() => {
-  const canvas = document.getElementById('worm');
-  const ctx = canvas.getContext('2d');
-  let width = 0, height = 0, points = [], frame = 0;
-  let seed = 302;
-  const random = () => ((seed = (seed * 1664525 + 1013904223) >>> 0) / 4294967296);
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  function build() {
-    points = [];
-    seed = 302;
-    for (let i = 0; i < 302; i++) {
-      const t = i / 301;
-      const centerX = .08 + .84 * t;
-      const centerY = .5 + Math.sin(t * Math.PI * 2.15 - .8) * .2;
-      const taper = Math.sin(Math.PI * Math.max(.02, Math.min(.98, t)));
-      const angle = random() * Math.PI * 2;
-      const radius = Math.sqrt(random()) * (.015 + .055 * taper);
-      points.push({x:centerX + Math.cos(angle)*radius,
-                   y:centerY + Math.sin(angle)*radius,
-                   p:random()*Math.PI*2, r:.7+random()*1.4});
+  function mount(canvas, embodied) {
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    let width = 0, height = 0, points = [], frame = 0, seed = embodied ? 1302 : 302;
+    const random = () => ((seed = (seed * 1664525 + 1013904223) >>> 0) / 4294967296);
+
+    function build() {
+      points = [];
+      seed = embodied ? 1302 : 302;
+      for (let i = 0; i < 302; i++) {
+        const t = i / 301;
+        const taper = Math.sin(Math.PI * Math.max(.02, Math.min(.98, t)));
+        const angle = random() * Math.PI * 2;
+        const radius = Math.sqrt(random()) * (.014 + .058 * taper);
+        points.push({t, angle, radius, p:random()*Math.PI*2, r:.7+random()*1.45});
+      }
     }
-  }
 
-  function resize() {
-    const box = canvas.getBoundingClientRect();
-    const dpr = Math.min(2, window.devicePixelRatio || 1);
-    width = box.width; height = box.height;
-    canvas.width = Math.round(width*dpr); canvas.height = Math.round(height*dpr);
-    ctx.setTransform(dpr,0,0,dpr,0,0);
-    build();
-  }
-
-  function draw() {
-    ctx.clearRect(0,0,width,height);
-    const now = frame++ * .018;
-    for (const point of points) {
-      const pulse = .38 + .62 * Math.max(0,Math.sin(now+point.p));
-      ctx.beginPath();
-      ctx.arc(point.x*width,point.y*height,point.r*(.8+pulse*.35),0,Math.PI*2);
-      ctx.fillStyle = `rgba(198,255,109,${.16+pulse*.67})`;
-      ctx.fill();
+    function resize() {
+      const box = canvas.getBoundingClientRect();
+      const dpr = Math.min(2, devicePixelRatio || 1);
+      width = box.width; height = box.height;
+      canvas.width = Math.max(2,Math.round(width*dpr));
+      canvas.height = Math.max(2,Math.round(height*dpr));
+      ctx.setTransform(dpr,0,0,dpr,0,0); build();
     }
-    requestAnimationFrame(draw);
+
+    function center(t, now) {
+      const motion = embodied && !reduced ? Math.sin(now*1.25+t*Math.PI*3.2)*.025 : 0;
+      return [.08+.84*t, .5+Math.sin(t*Math.PI*2.15-.8+motion)*.2+motion];
+    }
+
+    function draw() {
+      ctx.clearRect(0,0,width,height);
+      const now = reduced ? 0 : frame++*.014;
+      ctx.lineCap='round';ctx.beginPath();
+      for(let j=0;j<72;j++){const t=j/71,[x,y]=center(t,now);j?ctx.lineTo(x*width,y*height):ctx.moveTo(x*width,y*height)}
+      ctx.strokeStyle='rgba(237,241,213,.075)';ctx.lineWidth=embodied?27:22;ctx.stroke();
+      ctx.strokeStyle='rgba(120,231,204,.18)';ctx.lineWidth=1;ctx.stroke();
+      for (let i=0;i<points.length;i++) {
+        const point=points[i],[cx,cy]=center(point.t,now);
+        const x=cx+Math.cos(point.angle)*point.radius,y=cy+Math.sin(point.angle)*point.radius;
+        const pulse=.3+.7*Math.max(0,Math.sin(now+point.p));
+        const sensory=i===34||i===35,motor=i>248&&i<256;
+        ctx.beginPath();ctx.arc(x*width,y*height,point.r*(.82+pulse*.32),0,Math.PI*2);
+        ctx.fillStyle=sensory?`rgba(255,118,91,${.3+pulse*.55})`:motor?`rgba(120,231,204,${.25+pulse*.58})`:`rgba(198,255,109,${.12+pulse*.65})`;ctx.fill();
+      }
+      requestAnimationFrame(draw);
+    }
+    new ResizeObserver(resize).observe(canvas);resize();draw();
   }
 
-  new ResizeObserver(resize).observe(canvas);
-  resize(); draw();
+  mount(document.getElementById('worm'),false);
+  mount(document.getElementById('talk-worm'),true);
 })();
 </script>
 </body>
