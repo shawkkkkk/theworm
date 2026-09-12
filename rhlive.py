@@ -545,6 +545,13 @@ async def set_creator_tax(page, pct, send=None, shot=None):
 
 def step_brain(pilot, img, cx, cy, gains, seed, threshold=0.02):
     dx, dy, click, hz = pilot.step(img, cx, cy)
+    # Include the two sensory-node states in the telemetry packet so the live
+    # interface can show the input side as well as the locomotion readout.
+    hz = {
+        **hz,
+        "ASEL": pilot.brain.read("ASEL"),
+        "ASER": pilot.brain.read("ASER"),
+    }
     # Our worm model doesn't spike -- it has continuous activity, unlike the
     # fly's LIF sim. "Fired" here means "activity magnitude currently above
     # a threshold," a genuine readout of the real simulation state, not a

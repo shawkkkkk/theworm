@@ -3,524 +3,209 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Wormbrain Live</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Source+Serif+4:ital,wght@0,600;1,400&display=swap">
+<title>TheWorm Live Lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chivo+Mono:wght@300;400;500;600&family=Fraunces:opsz,wght@9..144,300;9..144,500&family=Manrope:wght@400;500;600&display=swap">
 <style>
 :root{
-    --ground:#07060a; --ink:#f2ead6; --dim:#9c9483; --muted:#5f5847; --faint:#241f16;
-    --amber:#ffb400; --amber-dim:#6b4c14; --good:#9dbf5e; --warn:#e0a032; --bad:#c85a3f;
-    --line:#26221a;
-  }
-  *{box-sizing:border-box}
-  html,body{height:100%}
-  body{margin:0;background:
-      radial-gradient(1100px 700px at 78% -8%, rgba(255,180,0,.09), transparent 60%),
-      radial-gradient(900px 600px at 0% 100%, rgba(157,191,94,.05), transparent 55%),
-      var(--ground);
-    color:var(--ink);overflow:hidden;font-family:"JetBrains Mono",monospace;font-size:14px}
-
-  .app{height:100vh;display:grid;grid-template-rows:auto auto 1fr auto;gap:0;
-    padding:0}
-
-  /* top strip: identity only, thin, no chrome */
-  .bar:first-of-type{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;
-    padding:16px 22px 10px;border-bottom:1px solid var(--line)}
-  .brand{display:flex;align-items:baseline;gap:11px}
-  .brand h1{margin:0;font-family:"Source Serif 4",Georgia,serif;font-size:22px;
-    font-weight:600;letter-spacing:-.01em;color:var(--ink)}
-  .brand h1 em{font-style:italic;font-weight:400;color:var(--amber)}
-  .brand .tag{font-size:11px;letter-spacing:.04em;color:var(--muted)}
-  .grow{flex:1}
-  .chip{font-size:11.5px;padding:3px 0;color:var(--dim);background:none;
-    border:0;border-left:1px solid var(--line);padding-left:12px;white-space:nowrap}
-  .chip b{color:var(--amber);font-weight:600}
-  .chip.live{color:#e08060}
-  .chip.dry{color:var(--amber)}
-
-  /* control strip: sits directly under identity, still no boxes */
-  .bar:nth-of-type(2){display:flex;align-items:center;gap:10px;flex-wrap:wrap;
-    padding:12px 22px;border-bottom:1px solid var(--line)}
-  button{font-family:"JetBrains Mono",monospace;font-size:13.5px;letter-spacing:.05em;
-    font-weight:700;color:#1a1206;background:var(--amber);border:0;padding:10px 26px}
-  button:disabled{opacity:.28;cursor:not-allowed}
-  button:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
-  input{font-family:"JetBrains Mono",monospace;font-size:12.5px;background:transparent;
-    border:0;border-bottom:1px solid var(--line);color:var(--ink);padding:8px 2px;
-    border-radius:0}
-  input::placeholder{color:var(--muted)}
-  input:focus{border-bottom-color:var(--amber);outline:0}
-  #name{width:120px} #ticker{width:85px} #desc{width:280px}
-
-  .steps{display:flex;align-items:center}
-  .st{display:flex;align-items:center;gap:7px;padding:0 16px 0 0}
-  .st .dot{width:5px;height:5px;background:var(--faint)}
-  .st .lbl{font-size:10.5px;letter-spacing:.06em;color:var(--muted)}
-  .st.on .dot{background:var(--amber);box-shadow:0 0 7px var(--amber)}
-  .st.on .lbl{color:var(--ink)}
-  .st.done .dot{background:var(--good)}
-  .st.done .lbl{color:var(--dim)}
-
-  /* main stage: neural activity is now the hero, live view is the secondary
-     monitor -- reversed from a browser-automation-first layout, because
-     the brain is the point, the browser is just what it happens to touch */
-  .main{display:grid;grid-template-columns:1fr 1.55fr;min-height:0}
-  .pane{background:none;border:0;display:flex;flex-direction:column;
-    min-width:0;min-height:0;overflow:hidden;position:relative}
-  .pane:first-child{order:2;border-left:1px solid var(--line)}
-  .pane:last-child{order:1}
-  .hd{display:flex;align-items:center;gap:9px;padding:10px 20px;flex:0 0 auto}
-  .hd .t{font-size:10.5px;letter-spacing:.1em;color:var(--muted)}
-  .hd .r{margin-left:auto;font-size:11px;color:var(--amber)}
-  .rec{width:6px;height:6px;border-radius:50%;background:var(--faint)}
-  .rec.on{background:var(--bad);animation:pulse 1.6s infinite}
-  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.25}}
-
-  #view{position:relative;flex:1;min-height:0;background:#040305;overflow:hidden;
-    margin:0 20px 20px}
-  #shot{width:100%;height:100%;object-fit:contain;display:block;opacity:.92}
-  #cur{position:absolute;width:54px;height:54px;margin:-27px 0 0 -27px;
-    pointer-events:none;z-index:4;
-    filter:drop-shadow(0 0 9px rgba(255,180,0,.85)) drop-shadow(0 0 3px rgba(0,0,0,.9))}
-  #ring{position:absolute;border:2px solid var(--good);border-radius:50%;opacity:0;
-    pointer-events:none;z-index:5}
-  #idle{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
-    color:var(--muted);font-size:11px}
-
-  .brainwrap{position:relative;flex:1;min-height:220px}
-  #brain{position:absolute;inset:0;width:100%;height:100%;display:block}
-  .readout{position:absolute;left:20px;top:6px;pointer-events:none}
-  .readout .n{font-family:"Source Serif 4",Georgia,serif;font-size:88px;font-weight:600;
-    line-height:1;letter-spacing:-.02em;font-variant-numeric:tabular-nums;
-    color:var(--amber);text-shadow:0 0 40px rgba(255,180,0,.4)}
-  .readout .u{font-size:11.5px;letter-spacing:.09em;color:var(--dim);margin-top:6px}
-  .dns{padding:10px 20px 18px;display:flex;flex-direction:column;gap:8px;flex:0 0 auto}
-  .dn{display:grid;grid-template-columns:88px 1fr 42px;align-items:center;gap:10px;
-    font-size:11.5px;color:var(--dim)}
-  .track{height:2px;background:var(--faint);overflow:hidden}
-  .track i{display:block;height:100%;width:0;background:var(--amber-dim);
-    transition:width .12s linear}
-  .track i.hi{background:var(--amber)}
-  .dn .v{text-align:right;font-variant-numeric:tabular-nums;color:var(--ink)}
-
-  /* footer: one continuous ticker strip, not five bordered boxes */
-  .foot{display:grid;grid-template-columns:1fr 1.55fr;border-top:1px solid var(--line)}
-  .tele{display:flex;padding:12px 20px;gap:26px;align-items:baseline}
-  .cell{flex:0 0 auto}
-  .cell .k{font-size:9.5px;letter-spacing:.07em;color:var(--muted)}
-  .cell .v{font-size:18px;margin-top:3px;font-variant-numeric:tabular-nums;color:var(--ink)}
-  .cell .v small{font-size:11px;color:var(--muted)}
-  .cell .v.go{color:var(--good)} .cell .v.warn{color:var(--warn)}
-  #log{background:none;border:0;border-left:1px solid var(--line);
-    padding:10px 20px;font-size:11.5px;color:var(--dim);height:auto;max-height:96px;
-    overflow-y:auto;line-height:1.7}
-  #log div{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  #log span{color:var(--faint);margin-right:7px}
-  #log a{color:var(--good)}
-  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+  color-scheme:dark;--void:#07110d;--depth:#0a1812;--tissue:#102219;
+  --membrane:#203a2d;--line:#294638;--bone:#edf1d5;--muted:#9eac91;
+  --faint:#687564;--spore:#c6ff6d;--aqua:#78e7cc;--coral:#ff765b;
+  --serif:"Fraunces",Georgia,serif;--sans:"Manrope",system-ui,sans-serif;
+  --mono:"Chivo Mono",ui-monospace,monospace
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--void);color:var(--bone);font:13px/1.5 var(--mono);overflow:hidden}
+body:before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.22;background-image:
+  linear-gradient(rgba(120,231,204,.04) 1px,transparent 1px),
+  linear-gradient(90deg,rgba(120,231,204,.04) 1px,transparent 1px);background-size:38px 38px}
+button,input{font:inherit}
+button:focus-visible,input:focus-visible{outline:2px solid var(--spore);outline-offset:2px}
+.app{height:100dvh;display:grid;grid-template-rows:auto auto minmax(0,1fr) auto;position:relative}
+.identity{min-height:66px;padding:13px 18px;display:flex;align-items:center;gap:18px;border-bottom:1px solid var(--line);background:rgba(7,17,13,.8)}
+.brand{display:flex;align-items:center;gap:12px;white-space:nowrap}
+.brand svg{width:34px;color:var(--spore)}
+.brand h1{font:300 23px/1 var(--serif);margin:0}.brand h1 em{color:var(--spore);font-style:italic}
+.identity-note{font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint)}
+.grow{flex:1}
+.chip{padding:6px 9px;border:1px solid var(--line);font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);white-space:nowrap}
+.chip b{color:var(--spore);font-weight:500}.chip.live{color:var(--coral)}.chip.dry{color:var(--aqua)}
+.controls{min-height:64px;padding:10px 18px;display:flex;align-items:center;gap:11px;border-bottom:1px solid var(--line);background:var(--depth)}
+button{height:40px;border:1px solid var(--spore);background:var(--spore);color:#09120d;padding:0 22px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;cursor:pointer}
+button:disabled{opacity:.28;cursor:not-allowed}
+input{height:40px;background:transparent;border:0;border-bottom:1px solid var(--line);color:var(--bone);padding:0 4px;min-width:0}
+input:focus{border-color:var(--spore);outline:0}input::placeholder{color:var(--faint)}
+#name{width:118px}#ticker{width:90px}#desc{width:min(410px,30vw)}
+.steps{margin-left:auto;display:flex;gap:16px;align-items:center}
+.step{display:flex;align-items:center;gap:6px;color:var(--faint);font-size:9px;letter-spacing:.08em;text-transform:uppercase}
+.step i{width:6px;height:6px;border:1px solid var(--faint);border-radius:50%}.step.on{color:var(--bone)}.step.on i{background:var(--coral);border-color:var(--coral);box-shadow:0 0 12px rgba(255,118,91,.6)}
+.step.done{color:var(--muted)}.step.done i{background:var(--spore);border-color:var(--spore)}
+.workspace{display:grid;grid-template-columns:1.08fr .92fr;min-height:0}
+.panel{min-width:0;min-height:0;display:flex;flex-direction:column;position:relative}
+.panel:first-child{border-right:1px solid var(--line)}
+.panel-head{height:43px;flex:0 0 auto;padding:0 16px;display:flex;align-items:center;gap:11px;border-bottom:1px solid var(--line);font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:var(--faint)}
+.panel-head .right{margin-left:auto;color:var(--aqua)}
+.rec{width:7px;height:7px;border-radius:50%;background:var(--faint)}.rec.on{background:var(--coral);animation:pulse 1.4s infinite}
+@keyframes pulse{50%{opacity:.25}}
+.brain-space{position:relative;min-height:0;flex:1;overflow:hidden;background:radial-gradient(circle at 55% 48%,rgba(198,255,109,.045),transparent 45%)}
+#brain{position:absolute;inset:0;width:100%;height:100%;display:block}
+.big-read{position:absolute;left:19px;top:16px;pointer-events:none}
+.big-read strong{display:block;font:300 74px/.85 var(--serif);color:var(--spore);font-variant-numeric:tabular-nums}
+.big-read span{display:block;margin-top:10px;color:var(--faint);font-size:9px;letter-spacing:.11em;text-transform:uppercase}
+.anatomy-note{position:absolute;left:19px;bottom:13px;color:var(--faint);font-size:8px;letter-spacing:.09em;text-transform:uppercase}
+.circuits{flex:0 0 auto;padding:12px 16px 16px;border-top:1px solid var(--line);background:rgba(10,24,18,.7)}
+.circuit-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:13px}
+.circuit{min-width:0}.circuit .key{color:var(--aqua);font-size:10px;margin-bottom:7px}.circuit .track{height:3px;background:var(--membrane)}.circuit .track i{display:block;width:0;height:100%;background:var(--spore);transition:width .12s}.circuit output{display:block;text-align:right;color:var(--muted);font-size:9px;margin-top:5px}
+.viewport{position:relative;min-height:0;flex:1;background:#030806;overflow:hidden}
+#shot{width:100%;height:100%;object-fit:contain;display:block}
+#cursor{position:absolute;width:68px;height:68px;margin:-34px 0 0 -34px;pointer-events:none;filter:drop-shadow(0 0 10px rgba(198,255,109,.68)) drop-shadow(0 2px 3px #000)}
+#ring{position:absolute;border:1px solid var(--coral);border-radius:50%;opacity:0;pointer-events:none}
+.idle{position:absolute;inset:0;display:grid;place-items:center;text-align:center;padding:30px;color:var(--faint)}
+.idle strong{display:block;font:300 28px var(--serif);color:var(--muted);margin-bottom:6px}.idle span{font-size:9px;letter-spacing:.1em;text-transform:uppercase}
+.viewport-url{height:34px;flex:0 0 auto;padding:0 14px;border-top:1px solid var(--line);display:flex;align-items:center;gap:12px;color:var(--faint);white-space:nowrap;overflow:hidden}
+.viewport-url span:first-child{overflow:hidden;text-overflow:ellipsis}.viewport-url span:last-child{margin-left:auto;color:var(--aqua)}
+.foot{min-height:92px;border-top:1px solid var(--line);display:grid;grid-template-columns:1.08fr .92fr;background:var(--depth)}
+.metrics{display:grid;grid-template-columns:repeat(5,1fr);border-right:1px solid var(--line)}
+.metric{padding:13px;border-right:1px solid var(--line)}.metric:last-child{border:0}.metric .k{color:var(--faint);font-size:8px;letter-spacing:.09em;text-transform:uppercase}.metric .v{font:300 20px var(--serif);margin-top:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.metric .v small{font:9px var(--mono);color:var(--faint)}.metric .v.good{color:var(--spore)}.metric .v.warn{color:var(--coral)}
+.log{padding:10px 15px;overflow:auto;max-height:92px;color:var(--muted);font-size:10px;line-height:1.65}
+.log div{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.log time{color:var(--faint);margin-right:8px}.log a{color:var(--spore)}
+@media(max-width:960px){body{overflow:auto}.app{height:auto;min-height:100dvh}.workspace{grid-template-columns:1fr}.panel:first-child{border-right:0;border-bottom:1px solid var(--line)}.brain-space,.viewport{height:440px;flex:none}.foot{grid-template-columns:1fr}.metrics{border-right:0;border-bottom:1px solid var(--line)}.log{min-height:90px}.steps{width:100%;order:4;margin:0}.controls{flex-wrap:wrap}#desc{width:100%;order:3}.identity{flex-wrap:wrap}}
+@media(max-width:600px){.identity-note{display:none}.chip:first-of-type{display:none}.controls{padding:10px}.circuit-grid{grid-template-columns:repeat(3,1fr)}.metrics{grid-template-columns:repeat(2,1fr)}.metric{border-bottom:1px solid var(--line)}.metric:last-child{grid-column:1/-1}.brain-space,.viewport{height:360px}.steps{gap:8px;overflow:auto}.step{font-size:8px}#name{flex:1}#ticker{width:100px}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
 <div class="app">
+  <header class="identity">
+    <div class="brand"><svg viewBox="0 0 70 36" aria-hidden="true"><path d="M3 23C14 4 24 33 36 14S54 28 67 8" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/><circle cx="67" cy="8" r="3" fill="currentColor"/></svg><h1>TheWorm <em>Live Lab</em></h1></div>
+    <span class="identity-note">C. elegans · Cook 2019 hermaphrodite connectome</span>
+    <span class="grow"></span>
+    <span class="chip"><b>302</b> nodes · <b>3,709</b> chemical edges · <b>1,100</b> GJ pairs</span>
+    <span class="chip" id="wallet">wallet check…</span>
+    <span class="chip dry" id="mode">loading safety state…</span>
+  </header>
 
-  <div>
-    <div class="bar">
-      <div class="brand">
-        <h1>Wormbrain <em>Live</em></h1>
-        <span class="tag">Caenorhabditis elegans &nbsp;&middot;&nbsp; Cook et al. 2019 hermaphrodite connectome</span>
-      </div>
-      <span class="grow"></span>
-      <span class="chip"><b>302</b> neurons &nbsp;&middot;&nbsp; <b>3,709</b> chemical synapses + <b>1,100</b> gap junctions</span>
-      <span class="chip" id="wallet">wallet&hellip;</span>
-      <span class="chip dry" id="mode">&hellip;</span>
-    </div>
-    <div class="bar" style="margin-top:9px">
-      <button id="start">START</button>
-      <input id="name" value="The Worm" placeholder="name">
-      <input id="ticker" value="TheWorm" placeholder="ticker">
-      <input id="desc" value="a real C. elegans connectome — paired with PFE, whose scientists used this worm to screen for Alzheimer's presenilin inhibitors" placeholder="description">
-      <span class="grow"></span>
-      <div class="steps" id="steps"></div>
-    </div>
+  <div class="controls">
+    <button id="start" type="button">Start dry run</button>
+    <input id="name" value="The Worm" aria-label="Token name" placeholder="name">
+    <input id="ticker" value="TheWorm" aria-label="Token ticker" placeholder="ticker">
+    <input id="desc" value="a C. elegans connectome interface experiment — planned PFE pairing, inspired by a Pfizer-affiliated worm presenilin screening study" aria-label="Token description" placeholder="description">
+    <div class="steps" id="steps" aria-label="Run stages"></div>
   </div>
 
-  <div class="main">
-    <section class="pane">
-      <div class="hd"><span class="rec" id="rec"></span>
-        <span class="t">Live &mdash; ponsfamily.com/launchpad</span>
-        <span class="r" id="phase">idle</span></div>
-      <div id="view">
-        <img id="shot" alt="" hidden>
-        <canvas id="cur" width="108" height="108" hidden></canvas>
+  <main class="workspace">
+    <section class="panel" aria-labelledby="brain-title">
+      <div class="panel-head"><span id="brain-title">Connectome activity · abstract continuous state</span><span class="right" id="ncount">loading graph…</span></div>
+      <div class="brain-space">
+        <canvas id="brain" aria-label="C. elegans neurons at c302 model coordinates"></canvas>
+        <div class="big-read"><strong id="active">0</strong><span id="activity-label">standby · not telemetry</span></div>
+        <div class="anatomy-note">positions from c302 model files · brightness = controller activity only during a run</div>
+      </div>
+      <div class="circuits"><div class="circuit-grid" id="circuits"></div></div>
+    </section>
+
+    <section class="panel" aria-labelledby="browser-title">
+      <div class="panel-head"><span class="rec" id="rec"></span><span id="browser-title">Browser environment · pons launchpad</span><span class="right" id="phase">idle</span></div>
+      <div class="viewport" id="viewport">
+        <img id="shot" alt="Browser page currently presented to the controller" hidden>
+        <canvas id="cursor" width="136" height="136" hidden aria-label="Decorative worm cursor at the controller position"></canvas>
         <div id="ring"></div>
-        <div id="idle">the worm takes the mouse when you press START</div>
+        <div class="idle" id="idle"><div><strong>Rig standing by.</strong><span>The browser remains disarmed until explicitly enabled.</span></div></div>
       </div>
+      <div class="viewport-url"><span id="url">No browser session</span><span id="frame-state">OFFLINE</span></div>
     </section>
+  </main>
 
-    <section class="pane">
-      <div class="hd"><span class="t">Neural activity</span>
-        <span class="r" id="ncount">&hellip;</span></div>
-      <div class="brainwrap">
-        <canvas id="brain"></canvas>
-        <div class="readout"><div class="n" id="firing">0</div>
-          <div class="u">neurons firing</div></div>
-      </div>
-      <div class="dns" id="dns"></div>
-    </section>
-  </div>
-
-  <div class="foot">
-    <div class="tele">
-      <div class="cell"><div class="k">Step</div><div class="v" id="t-step">&mdash;</div></div>
-      <div class="cell"><div class="k">Filled by worm</div><div class="v" id="t-fields">0 <small>/ 3</small></div></div>
-      <div class="cell"><div class="k">Target</div><div class="v" id="t-target" style="font-size:18px">&mdash;</div></div>
-      <div class="cell"><div class="k">Spikes</div><div class="v" id="t-spikes">0</div></div>
-      <div class="cell"><div class="k">Outcome</div><div class="v" id="t-out" style="font-size:12px">idle</div></div>
+  <footer class="foot">
+    <div class="metrics">
+      <div class="metric"><div class="k">step</div><div class="v" id="m-step">—</div></div>
+      <div class="metric"><div class="k">fields by worm</div><div class="v" id="m-fields">0 <small>/ 3</small></div></div>
+      <div class="metric"><div class="k">target</div><div class="v" id="m-target">—</div></div>
+      <div class="metric"><div class="k">activity events</div><div class="v" id="m-events">0</div></div>
+      <div class="metric"><div class="k">outcome</div><div class="v" id="m-outcome">idle</div></div>
     </div>
-    <div id="log"></div>
-  </div>
+    <div class="log" id="log" aria-live="polite"></div>
+  </footer>
 </div>
 
 <script>
 const $ = id => document.getElementById(id);
-let XYZ=null,GRP=null,N=0,heat=null,px=null,py=null,pz=null,theta=.45,idleMode=true,bodyOrder=null;
-
-const STAGES=[['wallet','wallet'],['image','image'],['fill','form'],
-              ['create','create'],['mint','mint']];
-STAGES.forEach(([k,l])=>{const d=document.createElement('div');d.className='st';d.id='st-'+k;
-  d.innerHTML='<div class="dot"></div><div class="lbl">'+l+'</div>';$('steps').appendChild(d);});
-function stage(k,state){const e=$('st-'+k);if(!e)return;
-  e.classList.remove('on','done');if(state)e.classList.add(state);}
-function stageDone(k){stage(k,'done');}
-
-const DNS=[['AVA','AVA'],['AVB','AVB'],['PVC','PVC'],
-           ['forward','forward'],['backward','backward']];
-const dnEl={};
-DNS.forEach(function(p){const lbl=p[0],k=p[1];
-  const d=document.createElement('div');d.className='dn';
-  d.innerHTML='<div>'+lbl+'</div><div class="track"><i></i></div><div class="v">0</div>';
-  $('dns').appendChild(d);dnEl[k]={i:d.querySelector('i'),v:d.querySelector('.v')};});
-
-function log(m){const d=document.createElement('div');
-  d.innerHTML='<span>'+new Date().toLocaleTimeString([],{hour12:false})+'</span>'+m;
-  $('log').appendChild(d);$('log').scrollTop=$('log').scrollHeight;}
-
-fetch('/status').then(r=>r.json()).then(s=>{
-  $('wallet').innerHTML = s.wallet
-    ? '<b>'+s.wallet.slice(0,6)+'…'+s.wallet.slice(-4)+'</b> · '
-      +(s.sol||0).toFixed(4)+' '+(s.unit||'SOL')
-    : 'no wallet';
-  if(s.venue){ document.querySelector('.hd .t').textContent='Live — '+s.venue; }
-  if(s.chain){ document.querySelector('.brand .tag').textContent=
-    'Caenorhabditis elegans · ' + s.chain; }
-  const m=$('mode');
-  m.textContent = s.live ? 'LIVE — will mint' : 'DRY RUN';
-  m.className = 'chip ' + (s.live ? 'live' : 'dry');
-  if(!s.armed){$('start').disabled=true;
-    $('idle').textContent='disarmed — set FLY_ALLOW_BROWSER=1 in .env';}
-});
-
-
-/* ---------------------------------------------------------------------------
-   The idle shape is a fly.
-
-   Every dot in the live view is a real neuron at its measured soma coordinate,
-   and the panel says so - rearranging those into a silhouette would turn
-   measurements into decoration. But the IDLE animation is not data: it is
-   spontaneous flicker to keep the panel alive while the connectome loads and
-   ponsfamily.com/launchpad opens. So the idle state gets a worm built from the same dots, and
-   the moment real spikes arrive it cuts to the actual anatomy.
---------------------------------------------------------------------------- */
-let FLY=null;
-function buildFly(n){
-  const P=new Float32Array(n*3); const R=()=>Math.random();
-  const gauss=()=>{let u=0,v=0;while(!u)u=R();while(!v)v=R();
-    return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);};
-  let i=0;
-  const put=(x,y,z)=>{if(i>=n)return;P[i*3]=x;P[i*3+1]=y;P[i*3+2]=z;i++;};
-  const ell=(cx,cy,cz,rx,ry,rz,k,shell)=>{for(let j=0;j<k;j++){
-    let x=gauss(),y=gauss(),z=gauss();
-    const d=Math.hypot(x,y,z)||1; x/=d;y/=d;z/=d;
-    const r=shell? 0.86+0.14*R() : Math.cbrt(R());
-    put(cx+x*rx*r, cy+y*ry*r, cz+z*rz*r);}};
-
-  ell( 0.42,0,0,    0.20,0.19,0.19, Math.floor(n*0.10), true);   // head
-  ell( 0.12,0,0,    0.26,0.22,0.22, Math.floor(n*0.16), true);   // thorax
-  ell(-0.38,0.02,0, 0.42,0.24,0.23, Math.floor(n*0.24), true);   // abdomen
-  ell( 0.50,0.05, 0.15, 0.10,0.12,0.07, Math.floor(n*0.05), false); // eye
-  ell( 0.50,0.05,-0.15, 0.10,0.12,0.07, Math.floor(n*0.05), false); // eye
-
-  for (const sgn of [1,-1]) {                                    // wings
-    const k=Math.floor(n*0.13);
-    for(let j=0;j<k;j++){
-      const t=R(), a=(R()-0.5);
-      const len=0.95*t, wid=0.16*Math.sin(Math.PI*t)*(1+0.3*a);
-      put(0.05-len*0.92, 0.20+len*0.34+wid*a*0.7, sgn*(0.10+len*0.20+wid*a));
-    }
-  }
-  for (let L=0; L<6; L++) {                                      // legs
-    const sgn=L<3?1:-1, seg=L%3;
-    const bx=0.24-seg*0.16, k=Math.floor(n*0.022);
-    for(let j=0;j<k;j++){
-      const t=R();
-      put(bx-t*0.34, -0.18-t*0.42, sgn*(0.16+t*0.20+0.03*gauss()));
-    }
-  }
-  while(i<n) put(gauss()*0.5, gauss()*0.28, gauss()*0.28);
-  return P;
+const STAGES = [['wallet','wallet'],['image','image'],['fill','form'],['create','create'],['sign','sign']];
+for (const [key,label] of STAGES) {
+  const node = document.createElement('div'); node.className='step'; node.id='stage-'+key;
+  node.innerHTML='<i></i><span>'+label+'</span>'; $('steps').appendChild(node);
 }
+function setStage(key,state){const node=$('stage-'+key);if(!node)return;node.classList.remove('on','done');if(state)node.classList.add(state)}
+function finishStage(key){setStage(key,'done')}
+function addLog(message,link){const row=document.createElement('div');const time=document.createElement('time');time.textContent=new Date().toLocaleTimeString([],{hour12:false});row.appendChild(time);if(link){const a=document.createElement('a');a.href=link;a.target='_blank';a.rel='noreferrer';a.textContent=message;row.appendChild(a)}else{row.appendChild(document.createTextNode(message))}$('log').appendChild(row);$('log').scrollTop=$('log').scrollHeight}
 
-const bc=$('brain'),bx=bc.getContext('2d');
-function fit(){const r=bc.parentElement.getBoundingClientRect();
-  const d=window.devicePixelRatio||1;
-  bc.width=Math.max(2,Math.floor(r.width*d));bc.height=Math.max(2,Math.floor(r.height*d));}
-addEventListener('resize',fit);
+fetch('/status').then(r=>r.json()).then(status=>{
+  $('wallet').innerHTML=status.wallet?'<b>'+status.wallet.slice(0,6)+'…'+status.wallet.slice(-4)+'</b> · '+Number(status.sol||0).toFixed(4)+' '+(status.unit||'ETH'):'no wallet loaded';
+  if(status.venue)$('browser-title').textContent='Browser environment · '+status.venue;
+  const mode=$('mode');mode.textContent=status.live?'LIVE BROADCAST ARMED':'DRY RUN · NO BROADCAST';mode.className='chip '+(status.live?'live':'dry');
+  if(!status.armed){$('start').disabled=true;$('idle').innerHTML='<div><strong>Browser disarmed.</strong><span>Enable browser control in the local .env only when ready.</span></div>'}
+}).catch(()=>{ $('mode').textContent='STATUS UNAVAILABLE'; $('start').disabled=true; });
 
-fetch('/neurons').then(async r=>{
-  const n=+r.headers.get('X-Count');const buf=await r.arrayBuffer();
-  XYZ=new Float32Array(buf,0,n*3);GRP=new Uint8Array(buf,n*12,n);N=n;
-  heat=new Float32Array(n);px=new Float32Array(n);py=new Float32Array(n);pz=new Float32Array(n);
-  let a=[1e9,-1e9,1e9,-1e9,1e9,-1e9];
-  for(let i=0;i<n;i++){const x=XYZ[i*3],y=XYZ[i*3+1],z=XYZ[i*3+2];
-    a[0]=Math.min(a[0],x);a[1]=Math.max(a[1],x);a[2]=Math.min(a[2],y);
-    a[3]=Math.max(a[3],y);a[4]=Math.min(a[4],z);a[5]=Math.max(a[5],z);}
-  const cx=(a[0]+a[1])/2,cy=(a[2]+a[3])/2,cz=(a[4]+a[5])/2,s=Math.max(a[1]-a[0],a[3]-a[2],a[5]-a[4])/2;
-  for(let i=0;i<n;i++){px[i]=(XYZ[i*3]-cx)/s;py[i]=(XYZ[i*3+1]-cy)/s;pz[i]=(XYZ[i*3+2]-cz)/s;}
-  const ranges=[a[1]-a[0],a[3]-a[2],a[5]-a[4]];
-  const axisArr=[px,py,pz][ranges.indexOf(Math.max(...ranges))];
-  const BINS=50;
-  let lo=Infinity,hi=-Infinity;
-  for(let i=0;i<n;i++){lo=Math.min(lo,axisArr[i]);hi=Math.max(hi,axisArr[i]);}
-  const sums=Array.from({length:BINS},()=>[0,0,0,0]); // x,y,z,count
-  for(let i=0;i<n;i++){
-    const b=Math.min(BINS-1,Math.floor((axisArr[i]-lo)/(hi-lo+1e-9)*BINS));
-    sums[b][0]+=px[i]; sums[b][1]+=py[i]; sums[b][2]+=pz[i]; sums[b][3]++;
+const CIRCUITS=[['ASEL','ASEL'],['ASER','ASER'],['AVA','AVA'],['AVB','AVB'],['PVC','PVC']];
+const circuitNodes={};
+for(const [label,key] of CIRCUITS){const node=document.createElement('div');node.className='circuit';node.innerHTML='<div class="key">'+label+'</div><div class="track"><i></i></div><output>0.000</output>';$('circuits').appendChild(node);circuitNodes[key]={bar:node.querySelector('i'),value:node.querySelector('output')}}
+
+let XYZ=null,groups=null,N=0,heat=null,xp=null,yp=null,zp=null,angle=.35,telemetry=false;
+const brain=$('brain'),ctx=brain.getContext('2d');
+function sizeBrain(){const rect=brain.parentElement.getBoundingClientRect(),d=Math.min(devicePixelRatio||1,2);brain.width=Math.max(2,Math.round(rect.width*d));brain.height=Math.max(2,Math.round(rect.height*d))}
+addEventListener('resize',sizeBrain);
+fetch('/neurons').then(async response=>{
+  const count=Number(response.headers.get('X-Count')),buffer=await response.arrayBuffer();
+  XYZ=new Float32Array(buffer,0,count*3);groups=new Uint8Array(buffer,count*12,count);N=count;
+  heat=new Float32Array(N);xp=new Float32Array(N);yp=new Float32Array(N);zp=new Float32Array(N);
+  const extent=[Infinity,-Infinity,Infinity,-Infinity,Infinity,-Infinity];
+  for(let i=0;i<N;i++){const x=XYZ[i*3],y=XYZ[i*3+1],z=XYZ[i*3+2];extent[0]=Math.min(extent[0],x);extent[1]=Math.max(extent[1],x);extent[2]=Math.min(extent[2],y);extent[3]=Math.max(extent[3],y);extent[4]=Math.min(extent[4],z);extent[5]=Math.max(extent[5],z)}
+  const cx=(extent[0]+extent[1])/2,cy=(extent[2]+extent[3])/2,cz=(extent[4]+extent[5])/2,scale=Math.max(extent[1]-extent[0],extent[3]-extent[2],extent[5]-extent[4])/2||1;
+  for(let i=0;i<N;i++){xp[i]=(XYZ[i*3]-cx)/scale;yp[i]=(XYZ[i*3+1]-cy)/scale;zp[i]=(XYZ[i*3+2]-cz)/scale}
+  $('ncount').textContent=N+' / 302 nodes loaded';sizeBrain();addLog('connectome coordinates loaded · '+N+' nodes');
+}).catch(()=>{$('ncount').textContent='graph unavailable';addLog('could not load neuron coordinates')});
+
+function drawBrain(){
+  const W=brain.width,H=brain.height,d=Math.min(devicePixelRatio||1,2);ctx.clearRect(0,0,W,H);ctx.fillStyle='#07110d';ctx.fillRect(0,0,W,H);
+  if(N){const c=Math.cos(angle),s=Math.sin(angle),scale=Math.min(W,H)*.44;
+    for(let i=0;i<N;i++){const X=W/2+(xp[i]*c-yp[i]*s)*scale*1.35,Y=H/2+zp[i]*scale,h=heat[i];ctx.beginPath();ctx.arc(X,Y,(h>.04?2.3:1.25)*d,0,Math.PI*2);if(h>.04)ctx.fillStyle=h>.62?'#edf1d5':groups[i]===1?'#ff765b':groups[i]===2?'#78e7cc':'#c6ff6d';else ctx.fillStyle=groups[i]===1?'rgba(255,118,91,.34)':groups[i]===2?'rgba(120,231,204,.32)':'rgba(104,117,100,.33)';ctx.fill();heat[i]*=.965}
+    angle+=telemetry?.0025:.0007;
   }
-  bodyOrder=sums.filter(s=>s[3]>0).map(s=>[s[0]/s[3], s[1]/s[3], s[2]/s[3]]);
-  FLY=buildFly(n);
-  $('ncount').textContent=n.toLocaleString()+' of 302 sampled';
-  fit();log('connectome loaded — '+n.toLocaleString()+' neurons at measured coordinates');
-});
-
-function draw(){
-  if(N){
-    const W=bc.width,H=bc.height,d=window.devicePixelRatio||1;
-    bx.fillStyle='#06070a';bx.fillRect(0,0,W,H);
-    const ct=Math.cos(theta),st=Math.sin(theta),S=Math.min(W,H)*.47;
-    const proj=(i)=>[W/2+(px[i]*ct-py[i]*st)*S*1.34, H/2+pz[i]*S*1.06];
-
-    // A faint trace through the real neurons in head-to-tail order, so the
-    // worm's actual body shape is visible even with few neurons active.
-    // This connects real measured positions -- not an invented outline.
-    if(bodyOrder){
-      bx.globalAlpha=0.12;
-      bx.strokeStyle='#63e6ff';
-      bx.lineWidth=1.5*d;
-      bx.beginPath();
-      for(let k=0;k<bodyOrder.length;k++){
-        const [bx3,by3,bz3]=bodyOrder[k];
-        const X=W/2+(bx3*ct-by3*st)*S*1.34, Y=H/2+bz3*S*1.06;
-        if(k===0) bx.moveTo(X,Y); else bx.lineTo(X,Y);
-      }
-      bx.stroke();
-    }
-
-    for(let i=0;i<N;i++){
-      const [X,Y]=proj(i), h=heat[i];
-      if(h>.03){
-        bx.globalAlpha=Math.min(1,.4+h);
-        bx.fillStyle=h>.6?'#ffffff':'#63e6ff';
-        const s2=(h>.6?2.6:2.0)*d;bx.fillRect(X-s2/2,Y-s2/2,s2,s2);
-      }else{
-        bx.globalAlpha=GRP[i]?.30:.13;
-        bx.fillStyle='#3a4356';bx.fillRect(X,Y,1.1*d,1.1*d);
-      }
-    }
-    bx.globalAlpha=1;
-  }
-  requestAnimationFrame(draw);
+  requestAnimationFrame(drawBrain)
 }
-draw();
+drawBrain();
+function setTelemetry(on){telemetry=on;$('activity-label').textContent=on?'active nodes · model threshold':'standby · not telemetry';if(!on){$('active').textContent='0';if(heat)heat.fill(0)}}
+function decodeIndices(encoded){const bytes=Uint8Array.from(atob(encoded),c=>c.charCodeAt(0));return new Uint16Array(bytes.buffer)}
+function showActivity(encoded,hz){const indices=decodeIndices(encoded);setTelemetry(true);if(heat)for(const i of indices)if(i<N)heat[i]=1;$('active').textContent=indices.length;for(const [label,key] of CIRCUITS){const value=Number((hz||{})[key]||0);circuitNodes[key].bar.style.width=Math.min(100,Math.abs(value)*100)+'%';circuitNodes[key].value.textContent=value.toFixed(3)}}
 
-/* A brain is never silent. Keep a low spontaneous flicker so the panel is alive
-   from the first frame, instead of a dead black box for the 20s it takes the
-   connectome to load and ponsfamily.com/launchpad to open. */
-setInterval(function(){
-  if(!N)return;
-  for(let i=0;i<N;i++)heat[i]*=0.955;
-  if(idleMode){for(let k=0;k<520;k++)heat[(Math.random()*N)|0]=Math.random()*0.55;}
-  theta+=0.0045;
-},60);
+let cursorNow=null,cursorTarget=null,cursorAngle=0,wave=0;
+const cursor=$('cursor'),wormCtx=cursor.getContext('2d');
+function drawWormCursor(speed){const W=cursor.width,mid=W/2;wormCtx.clearRect(0,0,W,W);wormCtx.save();wormCtx.translate(mid,mid);wormCtx.rotate(cursorAngle);wormCtx.lineCap='round';wormCtx.lineJoin='round';wormCtx.strokeStyle='rgba(3,8,6,.78)';wormCtx.lineWidth=16;wormCtx.beginPath();for(let i=0;i<18;i++){const t=i/17,x=-38+t*76,y=Math.sin(t*Math.PI*2.2+wave)*8*(.25+speed*.04);i?wormCtx.lineTo(x,y):wormCtx.moveTo(x,y)}wormCtx.stroke();wormCtx.strokeStyle='#c6ff6d';wormCtx.lineWidth=8;wormCtx.beginPath();for(let i=0;i<18;i++){const t=i/17,x=-38+t*76,y=Math.sin(t*Math.PI*2.2+wave)*8*(.25+Math.min(speed,10)*.04);i?wormCtx.lineTo(x,y):wormCtx.moveTo(x,y)}wormCtx.stroke();wormCtx.fillStyle='#ff765b';wormCtx.beginPath();wormCtx.arc(40,Math.sin(Math.PI*2.2+wave)*8,6,0,Math.PI*2);wormCtx.fill();wormCtx.restore()}
+function moveCursor(){if(cursorNow&&cursorTarget){const dx=cursorTarget.x-cursorNow.x,dy=cursorTarget.y-cursorNow.y,speed=Math.hypot(dx,dy);cursorNow.x+=dx*.17;cursorNow.y+=dy*.17;if(speed>.4){const wanted=Math.atan2(dy,dx),delta=Math.atan2(Math.sin(wanted-cursorAngle),Math.cos(wanted-cursorAngle));cursorAngle+=delta*.16}wave+=.12+Math.min(speed,12)*.025;const img=$('shot'),view=$('viewport');if(img.clientWidth){const sx=img.clientWidth/1280,sy=img.clientHeight/720,ox=(view.clientWidth-img.clientWidth)/2,oy=(view.clientHeight-img.clientHeight)/2;cursor.hidden=false;cursor.style.left=ox+cursorNow.x*sx+'px';cursor.style.top=oy+cursorNow.y*sy+'px'}drawWormCursor(speed)}requestAnimationFrame(moveCursor)}
+moveCursor();
+function paint(image){$('shot').hidden=false;$('idle').hidden=true;$('shot').src='data:image/jpeg;base64,'+image;$('frame-state').textContent='STREAMING'}
+function clickPulse(x,y){const img=$('shot'),view=$('viewport'),ring=$('ring'),sx=img.clientWidth/1280,sy=img.clientHeight/720,ox=(view.clientWidth-img.clientWidth)/2,oy=(view.clientHeight-img.clientHeight)/2;ring.style.left=ox+x*sx-26+'px';ring.style.top=oy+y*sy-26+'px';ring.style.width='52px';ring.style.height='52px';ring.animate([{opacity:1,transform:'scale(.3)'},{opacity:0,transform:'scale(1.7)'}],{duration:650})}
 
-/* When the fly's stepping ends, the simulation stops and no more spike data
-   arrives - the panel used to freeze on a stale count for the last 30s of the
-   run. Fall back to the spontaneous baseline and SAY that is what it is,
-   rather than leaving a dead number that looks like live activity. */
-function baseline(on){
-  idleMode = on;
-  const u = document.querySelector('.readout .u');
-  if(on){ u.textContent='spontaneous baseline'; $('firing').style.opacity='.55';
-          $('ncount').textContent='idle — spontaneous activity'; }
-  else  { u.textContent='neurons firing';       $('firing').style.opacity='1';
-          $('ncount').textContent='302 real neurons, watching'; }
-}
-
-let ws=null;
-$('start').onclick=function(){
-  $('start').disabled=true;$('idle').hidden=true;$('rec').classList.add('on');
-  $('t-out').textContent='running';$('t-out').className='v';
-  stage('wallet','on');
-  ws=new WebSocket((location.protocol==='https:'?'wss://':'ws://')+location.host+'/run');
-  ws.onopen=function(){log('connected');ws.send(JSON.stringify({action:'start',
-    name:$('name').value,ticker:$('ticker').value,desc:$('desc').value,
-    trained:true,headful:false,steps:18}));};
-  ws.onmessage=function(e){handle(JSON.parse(e.data));};
-  ws.onclose=function(){$('start').disabled=false;$('rec').classList.remove('on');
-    baseline(true);log('closed');};
+let socket=null;
+$('start').onclick=()=>{
+  $('start').disabled=true;$('rec').classList.add('on');$('m-outcome').textContent='running';setStage('wallet','on');$('idle').hidden=true;
+  socket=new WebSocket((location.protocol==='https:'?'wss://':'ws://')+location.host+'/run');
+  socket.onopen=()=>{addLog('run socket connected');socket.send(JSON.stringify({action:'start',name:$('name').value,ticker:$('ticker').value,desc:$('desc').value,trained:true,headful:false,steps:18}))};
+  socket.onmessage=event=>handle(JSON.parse(event.data));
+  socket.onclose=()=>{$('start').disabled=false;$('rec').classList.remove('on');$('frame-state').textContent='OFFLINE';setTelemetry(false);addLog('run socket closed')};
 };
 
-/* The pointer is a worm. Its position is the real thing - whatever AVA,
-   AVB and PVC did with what the worm sensed - so only the glyph is
-   decorative. It banks toward its heading and beats its wings while it moves,
-   and settles when it stops. */
-let curNow=null, curTo=null, curAng=0, wingT=0;
-const cc=$('cur'), cx2=cc?cc.getContext('2d'):null;
-
-function drawFlySprite(speed){
-  if(!cx2) return;
-  const W=cc.width, S=W/2;
-  cx2.clearRect(0,0,W,W);
-  cx2.save(); cx2.translate(S,S); cx2.rotate(curAng+Math.PI/2);
-
-  // a dark halo first: the sprite has to read over a white form field as well
-  // as over black, and video compression eats anything low-contrast
-  cx2.globalAlpha=0.5; cx2.fillStyle='#000';
-  cx2.beginPath(); cx2.ellipse(0,2,13,17,0,0,6.283); cx2.fill();
-
-  const dot=(x,y,r,a,c)=>{cx2.globalAlpha=a;cx2.fillStyle=c;
-    cx2.beginPath();cx2.arc(x,y,r,0,6.283);cx2.fill();};
-
-  const beat=Math.sin(wingT)*(0.4+Math.min(speed,14)/14*0.6);
-  for(let i=0;i<20;i++){                        // wings
-    const t=i/19, sp=7+t*15, y=-5-t*9-beat*7;
-    dot(-sp*0.6, y, 1.9, 0.85-t*0.3, '#8fe9ff');
-    dot( sp*0.6, y, 1.9, 0.85-t*0.3, '#8fe9ff');
-  }
-  for(let i=0;i<10;i++){                        // abdomen
-    const t=i/9; dot(0, 4+t*12, 4.2-t*2.2, 1, '#ffffff');
-  }
-  for(let i=0;i<6;i++){                         // thorax
-    const t=i/5; dot(0, -2+t*5, 4.8, 1, '#ffffff');
-  }
-  dot(0,-8.5,4.0,1,'#ffffff');                  // head
-  dot(-3.4,-9.5,2.6,1,'#63e6ff');               // eyes
-  dot( 3.4,-9.5,2.6,1,'#63e6ff');
-  for(const sgn of [-1,1]) for(let L=0;L<3;L++){ // legs
-    for(let i=0;i<4;i++){const t=i/3;
-      dot(sgn*(4+t*8), 2+L*4+t*6, 1.3, 0.8, '#bfefff');}
-  }
-  cx2.restore(); cx2.globalAlpha=1;
-}
-
-function placeCursor(){
-  if(!curNow||!curTo){requestAnimationFrame(placeCursor);return;}
-  const dx=curTo.x-curNow.x, dy=curTo.y-curNow.y;
-  const speed=Math.hypot(dx,dy);
-  curNow.x += dx*0.16; curNow.y += dy*0.16;
-  if(speed>0.6){
-    const want=Math.atan2(dy,dx);
-    let d=want-curAng; while(d>Math.PI)d-=6.283; while(d<-Math.PI)d+=6.283;
-    curAng += d*0.18;
-  }
-  wingT += 0.55 + Math.min(speed,14)*0.09;
-  const img=$('shot');
-  if(img && img.clientWidth){
-    const sx=img.clientWidth/1280, sy=img.clientHeight/720;
-    const ox=(img.parentElement.clientWidth-img.clientWidth)/2;
-    const oy=(img.parentElement.clientHeight-img.clientHeight)/2;
-    if(cc) cc.hidden=false;
-    cc.style.left=(ox+curNow.x*sx)+'px';
-    cc.style.top=(oy+curNow.y*sy)+'px';
-  }
-  drawFlySprite(speed);
-  requestAnimationFrame(placeCursor);
-}
-placeCursor();
-
-function paint(b64){$('shot').hidden=false;$('idle').style.display='none';
-  $('shot').src='data:image/jpeg;base64,'+b64;}
-
-function handle(m){
-  if(m.type==='frame'){paint(m.shot);
-    if(m.note){$('phase').textContent=m.note;
-      if(/image/i.test(m.note))stageDone('image');
-      if(/typed/i.test(m.note))stage('fill','on');
-      if(/create/i.test(m.note))stage('create','on');
-      if(/confirm|coin/i.test(m.note))stage('mint','on');}
-    return;}
-  if(m.type==='watch'){
-    baseline(false);
-    const idx=Uint8Array.from(atob(m.idx),function(c){return c.charCodeAt(0);});
-    const u16=new Uint16Array(idx.buffer);
-    if(heat)for(let i=0;i<u16.length;i++)heat[u16[i]]=1;
-    $('firing').textContent=u16.length.toLocaleString();
-    document.querySelector('.readout .u').textContent='neurons firing — watching';
-    DNS.forEach(function(p){const k=p[1],v=m.hz[k]||0;
-      dnEl[k].i.style.width=Math.min(100,v/460*100)+'%';
-      dnEl[k].i.classList.toggle('hi',v>=330);dnEl[k].v.textContent=v;});
-    return;}
-  if(m.type==='cursor'){ curTo={x:m.cx,y:m.cy};
-    if(!curNow) curNow={x:m.cx,y:m.cy}; return;}
-  if(m.type==='log'){
-    const t=m.msg||'';
-    if(/wallet connected/i.test(t))stageDone('wallet');
-    if(/image selected|image uploaded/i.test(t))stageDone('image');
-    if(/FINAL field values/i.test(t))stageDone('fill');
-    if(/create button armed|on the create button/i.test(t))stageDone('create');
-    if(/broadcast|minted/i.test(t))stage('mint','on');
-    log(t.replace(/</g,'&lt;'));return;}
-  if(m.type==='wallet'){$('phase').textContent=m.connected?'wallet connected':'not connected';
-    if(m.connected)stageDone('wallet');return;}
-  if(m.type==='fields'){const f=m.by_fly||[],r=m.by_rig||[];
-    $('t-fields').innerHTML=f.length+' <small>/ 3</small>';
-    log('by WORM: '+(f.join(', ')||'none')+(r.length?'  ·  by rig: '+r.join(', '):''));
-    stageDone('fill');baseline(true);return;}
-  if(m.type==='step'){
-    paint(m.shot);
-    const idx=Uint8Array.from(atob(m.idx),function(c){return c.charCodeAt(0);});
-    const u16=new Uint16Array(idx.buffer);
-    baseline(false);
-    if(heat)for(let i=0;i<u16.length;i++)heat[u16[i]]=1;
-    $('firing').textContent=u16.length.toLocaleString();
-    DNS.forEach(function(p){const k=p[1],v=m.hz[k]||0;
-      dnEl[k].i.style.width=Math.min(100,v/460*100)+'%';
-      dnEl[k].i.classList.toggle('hi',v>=330);dnEl[k].v.textContent=v;});
-    $('t-step').textContent=String(m.t+1).padStart(2,'0');
-    $('t-fields').innerHTML=m.filled.length+' <small>/ 3</small>';
-    $('t-target').textContent=m.target;
-    $('t-spikes').textContent=m.spikes.toLocaleString();
-    $('phase').textContent=m.create_label||'filling the form';
-    curTo={x:m.cx,y:m.cy}; if(!curNow) curNow={x:m.cx,y:m.cy};
-    if(m.click){const r=$('ring'),img=$('shot');
-      const sx=img.clientWidth/1280,sy=img.clientHeight/720;
-      const ox=(img.parentElement.clientWidth-img.clientWidth)/2;
-      const oy=(img.parentElement.clientHeight-img.clientHeight)/2;
-      r.style.left=(ox+m.cx*sx-26)+'px';r.style.top=(oy+m.cy*sy-26)+'px';
-      r.style.width='52px';r.style.height='52px';
-      r.animate([{opacity:1,transform:'scale(.35)'},{opacity:0,transform:'scale(1.6)'}],
-        {duration:650});}
-    if(m.note)log(m.note);
-    return;}
-  if(m.type==='done'){
-    $('start').disabled=false;$('rec').classList.remove('on');baseline(true);
-    const o=$('t-out');
-    if(m.outcome==='minted'){o.textContent='minted';o.className='v go';
-      stageDone('mint');
-      log('MINTED → <a href="'+m.result+'" target="_blank">'+m.result+'</a>');
-      if(m.mint)log('mint '+m.mint);
-      if(m.sig)log('sig  '+m.sig);}
-    else if(m.outcome==='dry'){o.textContent='dry run';o.className='v warn';log(m.msg||'');}
-    else{o.textContent=m.outcome||'error';o.className='v warn';log(m.msg||'');}
-  }
+function handle(message){
+  if(message.type==='frame'){paint(message.shot);if(message.note){$('phase').textContent=message.note;if(/image/i.test(message.note))finishStage('image');if(/typed/i.test(message.note))setStage('fill','on');if(/create/i.test(message.note))setStage('create','on');if(/confirm|coin/i.test(message.note))setStage('sign','on')}return}
+  if(message.type==='watch'){showActivity(message.idx,message.hz);return}
+  if(message.type==='cursor'){cursorTarget={x:message.cx,y:message.cy};if(!cursorNow)cursorNow={...cursorTarget};return}
+  if(message.type==='log'){const text=message.msg||'';if(/wallet connected/i.test(text))finishStage('wallet');if(/image selected|image uploaded/i.test(text))finishStage('image');if(/FINAL field values/i.test(text))finishStage('fill');if(/create button armed|on the create button/i.test(text))finishStage('create');if(/broadcast|minted/i.test(text))setStage('sign','on');addLog(text);return}
+  if(message.type==='wallet'){if(message.connected)finishStage('wallet');$('phase').textContent=message.connected?'wallet connected':'wallet unavailable';return}
+  if(message.type==='fields'){const byWorm=message.by_fly||[],byRig=message.by_rig||[];$('m-fields').innerHTML=byWorm.length+' <small>/ 3</small>';addLog('by WORM: '+(byWorm.join(', ')||'none')+(byRig.length?' · by rig: '+byRig.join(', '):''));finishStage('fill');setTelemetry(false);return}
+  if(message.type==='step'){paint(message.shot);showActivity(message.idx,message.hz);$('m-step').textContent=String(message.t+1).padStart(2,'0');$('m-fields').innerHTML=message.filled.length+' <small>/ 3</small>';$('m-target').textContent=message.target;$('m-events').textContent=Number(message.spikes||0).toLocaleString();$('phase').textContent=message.create_label||'controller stepping';cursorTarget={x:message.cx,y:message.cy};if(!cursorNow)cursorNow={...cursorTarget};if(message.click)clickPulse(message.cx,message.cy);if(message.note)addLog(message.note);return}
+  if(message.type==='done'){$('start').disabled=false;$('rec').classList.remove('on');setTelemetry(false);const out=$('m-outcome');if(message.outcome==='minted'){out.textContent='broadcast';out.className='v good';finishStage('sign');addLog('transaction result',message.result)}else if(message.outcome==='dry'){out.textContent='dry run';out.className='v warn';addLog(message.msg||'dry run completed')}else{out.textContent=message.outcome||'error';out.className='v warn';addLog(message.msg||'run ended')}return}
 }
 </script>
 </body>
