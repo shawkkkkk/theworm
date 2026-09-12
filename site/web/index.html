@@ -359,6 +359,20 @@ footer{padding:42px 0 60px}.footer-grid{display:grid;grid-template-columns:1fr a
     function draw() {
       ctx.clearRect(0, 0, w, h);
       const time = reduced ? 0 : frame++ * .012;
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      for (let j = 0; j < 70; j++) {
+        const t = j / 69;
+        const x = (.08 + .84 * t) * w;
+        const y = (.5 + Math.sin(t * Math.PI * 2.2 - .7) * .2) * h;
+        j ? ctx.lineTo(x, y) : ctx.moveTo(x, y);
+      }
+      ctx.strokeStyle = 'rgba(237,241,213,.075)';
+      ctx.lineWidth = (compact ? 17 : 27);
+      ctx.stroke();
+      ctx.strokeStyle = 'rgba(120,231,204,.16)';
+      ctx.lineWidth = 1;
+      ctx.stroke();
       ctx.strokeStyle = 'rgba(120,231,204,.08)';
       ctx.lineWidth = 1;
       for (let i = 0; i < 140; i++) {

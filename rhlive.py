@@ -71,9 +71,15 @@ def boot():
     grp[wb.idx(["ASEL", "ASER"])] = 1
     grp[wb.idx(["AVAL", "AVAR", "AVBL", "AVBR", "PVCL", "PVCR"])] = 2
 
+    # Pairs are real non-zero anatomical connections. The browser warps node
+    # positions into a readable worm silhouette, but never invents the edges.
+    edges = np.argwhere(
+        (np.abs(wb.W_chem) > 0) | (np.abs(wb.W_elec) > 0)
+    ).astype(np.uint16)
+
     STATE.update(brain=wb, pilot=pilot,
                  remap=np.arange(wb.n, dtype=np.int32),
-                 xyz=xyz, grp=grp)
+                 xyz=xyz, grp=grp, edges=edges)
     print(f"brain ready: {wb.n} neurons (worm), all at real measured coordinates")
 
 
@@ -87,6 +93,14 @@ async def neurons():
     return Response(content=STATE["xyz"].tobytes() + STATE["grp"].tobytes(),
                     media_type="application/octet-stream",
                     headers={"X-Count": str(len(STATE["grp"]))})
+
+
+@app.get("/connectome")
+async def connectome():
+    edges = STATE["edges"]
+    return Response(content=edges.tobytes(),
+                    media_type="application/octet-stream",
+                    headers={"X-Edges": str(len(edges))})
 
 
 @app.get("/status")

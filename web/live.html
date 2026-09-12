@@ -99,9 +99,9 @@ input:focus{border-color:var(--spore);outline:0}input::placeholder{color:var(--f
     <section class="panel" aria-labelledby="brain-title">
       <div class="panel-head"><span id="brain-title">Connectome activity · abstract continuous state</span><span class="right" id="ncount">loading graph…</span></div>
       <div class="brain-space">
-        <canvas id="brain" aria-label="C. elegans neurons at c302 model coordinates"></canvas>
+        <canvas id="brain" aria-label="C. elegans neuron identities and real edges warped into a worm silhouette"></canvas>
         <div class="big-read"><strong id="active">0</strong><span id="activity-label">standby · not telemetry</span></div>
-        <div class="anatomy-note">positions from c302 model files · brightness = controller activity only during a run</div>
+        <div class="anatomy-note">longitudinal model coordinates warped into a silhouette · sampled edges are anatomical · brightness is live only during a run</div>
       </div>
       <div class="circuits"><div class="circuit-grid" id="circuits"></div></div>
     </section>
@@ -152,26 +152,34 @@ const CIRCUITS=[['ASEL','ASEL'],['ASER','ASER'],['AVA','AVA'],['AVB','AVB'],['PV
 const circuitNodes={};
 for(const [label,key] of CIRCUITS){const node=document.createElement('div');node.className='circuit';node.innerHTML='<div class="key">'+label+'</div><div class="track"><i></i></div><output>0.000</output>';$('circuits').appendChild(node);circuitNodes[key]={bar:node.querySelector('i'),value:node.querySelector('output')}}
 
-let XYZ=null,groups=null,N=0,heat=null,xp=null,yp=null,zp=null,angle=.35,telemetry=false;
+let XYZ=null,groups=null,N=0,heat=null,sx=null,sy=null,edges=null,telemetry=false;
 const brain=$('brain'),ctx=brain.getContext('2d');
 function sizeBrain(){const rect=brain.parentElement.getBoundingClientRect(),d=Math.min(devicePixelRatio||1,2);brain.width=Math.max(2,Math.round(rect.width*d));brain.height=Math.max(2,Math.round(rect.height*d))}
 addEventListener('resize',sizeBrain);
 fetch('/neurons').then(async response=>{
   const count=Number(response.headers.get('X-Count')),buffer=await response.arrayBuffer();
   XYZ=new Float32Array(buffer,0,count*3);groups=new Uint8Array(buffer,count*12,count);N=count;
-  heat=new Float32Array(N);xp=new Float32Array(N);yp=new Float32Array(N);zp=new Float32Array(N);
+  heat=new Float32Array(N);sx=new Float32Array(N);sy=new Float32Array(N);
   const extent=[Infinity,-Infinity,Infinity,-Infinity,Infinity,-Infinity];
   for(let i=0;i<N;i++){const x=XYZ[i*3],y=XYZ[i*3+1],z=XYZ[i*3+2];extent[0]=Math.min(extent[0],x);extent[1]=Math.max(extent[1],x);extent[2]=Math.min(extent[2],y);extent[3]=Math.max(extent[3],y);extent[4]=Math.min(extent[4],z);extent[5]=Math.max(extent[5],z)}
-  const cx=(extent[0]+extent[1])/2,cy=(extent[2]+extent[3])/2,cz=(extent[4]+extent[5])/2,scale=Math.max(extent[1]-extent[0],extent[3]-extent[2],extent[5]-extent[4])/2||1;
-  for(let i=0;i<N;i++){xp[i]=(XYZ[i*3]-cx)/scale;yp[i]=(XYZ[i*3+1]-cy)/scale;zp[i]=(XYZ[i*3+2]-cz)/scale}
+  const ranges=[extent[1]-extent[0],extent[3]-extent[2],extent[5]-extent[4]],axis=ranges.indexOf(Math.max(...ranges));
+  let seed=302;const random=()=>((seed=(seed*1664525+1013904223)>>>0)/4294967296);
+  for(let i=0;i<N;i++){const value=XYZ[i*3+axis],t=(value-extent[axis*2])/(ranges[axis]||1),taper=Math.pow(Math.sin(Math.PI*(.02+.96*t)),.7),jitter=(random()-.5)*(.035+.16*taper);sx[i]=.07+.86*t;sy[i]=.5+Math.sin(t*Math.PI*2.15-.65)*.2+jitter}
   $('ncount').textContent=N+' / 302 nodes loaded';sizeBrain();addLog('connectome coordinates loaded · '+N+' nodes');
 }).catch(()=>{$('ncount').textContent='graph unavailable';addLog('could not load neuron coordinates')});
 
+fetch('/connectome').then(async response=>{const buffer=await response.arrayBuffer();edges=new Uint16Array(buffer);addLog('anatomical edge sample ready · '+Number(response.headers.get('X-Edges')||0).toLocaleString()+' directed pairs')}).catch(()=>addLog('connection overlay unavailable'));
+
 function drawBrain(){
   const W=brain.width,H=brain.height,d=Math.min(devicePixelRatio||1,2);ctx.clearRect(0,0,W,H);ctx.fillStyle='#07110d';ctx.fillRect(0,0,W,H);
-  if(N){const c=Math.cos(angle),s=Math.sin(angle),scale=Math.min(W,H)*.44;
-    for(let i=0;i<N;i++){const X=W/2+(xp[i]*c-yp[i]*s)*scale*1.35,Y=H/2+zp[i]*scale,h=heat[i];ctx.beginPath();ctx.arc(X,Y,(h>.04?2.3:1.25)*d,0,Math.PI*2);if(h>.04)ctx.fillStyle=h>.62?'#edf1d5':groups[i]===1?'#ff765b':groups[i]===2?'#78e7cc':'#c6ff6d';else ctx.fillStyle=groups[i]===1?'rgba(255,118,91,.34)':groups[i]===2?'rgba(120,231,204,.32)':'rgba(104,117,100,.33)';ctx.fill();heat[i]*=.965}
-    angle+=telemetry?.0025:.0007;
+  if(N){
+    const px=i=>sx[i]*W,py=i=>sy[i]*H;
+    ctx.lineCap='round';ctx.strokeStyle='rgba(198,255,109,.06)';ctx.lineWidth=Math.max(1,d*.65);
+    if(edges){for(let k=0;k<edges.length;k+=10){const a=edges[k],b=edges[k+1];if(a>=N||b>=N)continue;ctx.beginPath();ctx.moveTo(px(a),py(a));ctx.lineTo(px(b),py(b));ctx.stroke()}}
+    ctx.strokeStyle='rgba(237,241,213,.10)';ctx.lineWidth=22*d;ctx.beginPath();for(let j=0;j<70;j++){const t=j/69,X=t*W,Y=(.5+Math.sin(t*Math.PI*2.15-.65)*.2)*H;j?ctx.lineTo(X,Y):ctx.moveTo(X,Y)}ctx.stroke();
+    ctx.strokeStyle='rgba(120,231,204,.18)';ctx.lineWidth=1.1*d;ctx.stroke();
+    for(let i=0;i<N;i++){const X=px(i),Y=py(i),h=heat[i];if(h>.04){ctx.shadowBlur=12*d;ctx.shadowColor=groups[i]===1?'#ff765b':groups[i]===2?'#78e7cc':'#c6ff6d'}else ctx.shadowBlur=0;ctx.beginPath();ctx.arc(X,Y,(h>.04?2.6:1.35)*d,0,Math.PI*2);if(h>.04)ctx.fillStyle=h>.62?'#edf1d5':groups[i]===1?'#ff765b':groups[i]===2?'#78e7cc':'#c6ff6d';else ctx.fillStyle=groups[i]===1?'rgba(255,118,91,.55)':groups[i]===2?'rgba(120,231,204,.5)':'rgba(198,255,109,.38)';ctx.fill();heat[i]*=.965}
+    ctx.shadowBlur=0;
   }
   requestAnimationFrame(drawBrain)
 }
