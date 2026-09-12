@@ -28,8 +28,8 @@ import uvicorn
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.responses import HTMLResponse, Response
 
-from flysim import FlyBrain
-from flyeye import FlyPilot
+from worm_sim import WormBrain
+from worm_eye import WormPilot
 from envcfg import load_env
 from rhwallet import account, CHAIN_ID, RPC, LAUNCH_FEE_ETH, balance
 from rhprovider import attach
@@ -58,32 +58,14 @@ def browser_allowed():
     return load_env().get("FLY_ALLOW_BROWSER", "0") == "1"
 
 
-def boot(n_keep=11000):
-    import pandas as pd
-    fb = FlyBrain()
-    pilot = FlyPilot(fb, sim_steps=60)
-    a = pd.read_feather(ROOT / "data" / "body-annotations.feather")
-    a = a[["bodyId", "somaLocation"]].dropna(subset=["somaLocation"])
-    a = a.drop_duplicates(subset=["bodyId"])
-    pos = pd.Series(list(a.somaLocation), index=a.bodyId.to_numpy())
-    have = pos.reindex(fb.bodies)
-    ok = have.notna().to_numpy()
-    P = np.full((fb.n, 3), np.nan, dtype=np.float32)
-    P[ok] = np.stack(have[ok].to_numpy()).astype(np.float32)
-    grp = np.zeros(fb.n, dtype=np.uint8)
-    for t, g in (("^L1$|^L2$", 1), ("^DNa02$|^DNa01$|^MDN$|^DNp09$", 2), ("^MN9$", 3)):
-        grp[fb.where(type_re=t)] = g
-    special = np.flatnonzero(ok & (grp > 0))
-    rest = np.flatnonzero(ok & (grp == 0))
-    rng = np.random.default_rng(0)
-    take = rng.choice(rest, size=min(n_keep - len(special), len(rest)), replace=False)
-    keep = np.sort(np.concatenate([special, take]))
-    remap = np.full(fb.n, -1, dtype=np.int32)
-    remap[keep] = np.arange(len(keep))
-    STATE.update(brain=fb, pilot=pilot, remap=remap,
-                 xyz=P[keep].astype(np.float32), grp=grp[keep])
-    print(f"brain ready: {fb.n:,} neurons, {fb.W.nnz:,} edges; "
-          f"{len(keep):,} streamed to the viewer")
+def boot():
+    wb = WormBrain()
+    pilot = WormPilot(wb)
+    xyz = np.zeros((0, 3), dtype=np.float32)
+    grp = np.zeros((0,), dtype=np.uint8)
+    STATE.update(brain=wb, pilot=pilot,
+                 remap=np.full(wb.n, -1, dtype=np.int32), xyz=xyz, grp=grp)
+    print(f"brain ready: {wb.n} neurons (worm)")
 
 
 @app.get("/")
@@ -553,19 +535,9 @@ async def set_creator_tax(page, pct, send=None, shot=None):
 
 
 def step_brain(pilot, img, cx, cy, gains, seed):
-    drive = pilot.eye.look(img, cx, cy)
-    r = pilot.fb.run(drive, steps=pilot.sim_steps, gains=gains,
-                     record=pilot.motor, seed=seed, spike_log=True)
-    hz = {k: float(r[k].mean()) for k in pilot.motor}
-    turn = (hz["steer_R"] - hz["steer_L"]) / 450.0
-    fwd = (hz["fwd_L"] + hz["fwd_R"]) / 2.0 / 450.0
-    back = hz["back"] / 450.0
-    stop = hz["stop"] / 450.0
-    speed = np.clip(fwd - back, -1, 1) * (1.0 - np.clip(stop, 0, 1))
-    fired = np.concatenate(r["_spikes"]) if r["_spikes"] else np.array([], dtype=np.int32)
-    click = hz["stop"] >= pilot.click_hz and speed < 0.25
-    return (float(np.clip(turn, -1, 1) * 90.0), float(-speed * 90.0),
-            bool(click), hz, fired)
+    dx, dy, click, hz = pilot.step(img, cx, cy)
+    fired = np.array([], dtype=np.int32)
+    return dx, dy, click, hz, fired
 
 
 async def run_episode(ws, coin, steps, seed, headful):
@@ -698,7 +670,7 @@ async def run_episode(ws, coin, steps, seed, headful):
                     watch["n"] += 1
                     await ws.send_text(json.dumps({
                         "type": "watch",
-                        "hz": {k: round(v) for k, v in hz.items()},
+                        "hz": {k: round(v, 4) for k, v in hz.items()},
                         "idx": base64.b64encode(mm.tobytes()).decode()}))
                 except Exception:
                     pass
@@ -815,7 +787,7 @@ async def run_episode(ws, coin, steps, seed, headful):
                 note = f"typed {tk}"
 
             await send({"type": "step", "t": t, "cx": cx, "cy": cy, "target": tk,
-                        "hz": {k: round(v) for k, v in hz.items()},
+                        "hz": {k: round(v, 4) for k, v in hz.items()},
                         "click": bool(hit), "filled": sorted(filled),
                         "clicks": len(filled), "spikes": spikes_total, "note": note,
                         "create_label": f.get("launch", {}).get("label", ""),

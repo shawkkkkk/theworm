@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Flybrain Live</title>
+<title>Wormbrain Live</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@500;600;700&display=swap">
 <style>
   :root{
@@ -119,11 +119,11 @@
   <div>
     <div class="bar">
       <div class="brand">
-        <h1>Flybrain <em>Live</em></h1>
-        <span class="tag">Drosophila melanogaster &nbsp;&middot;&nbsp; male CNS connectome v1.0</span>
+        <h1>Wormbrain <em>Live</em></h1>
+        <span class="tag">Caenorhabditis elegans &nbsp;&middot;&nbsp; Cook et al. 2019 hermaphrodite connectome</span>
       </div>
       <span class="grow"></span>
-      <span class="chip"><b>165,122</b> neurons &nbsp;&middot;&nbsp; <b>10,228,000</b> synapses</span>
+      <span class="chip"><b>302</b> neurons &nbsp;&middot;&nbsp; <b>3,709</b> chemical synapses + <b>1,100</b> gap junctions</span>
       <span class="chip" id="wallet">wallet&hellip;</span>
       <span class="chip dry" id="mode">&hellip;</span>
     </div>
@@ -140,13 +140,13 @@
   <div class="main">
     <section class="pane">
       <div class="hd"><span class="rec" id="rec"></span>
-        <span class="t">Live &mdash; pump.fun</span>
+        <span class="t">Live &mdash; ponsfamily.com/launchpad</span>
         <span class="r" id="phase">idle</span></div>
       <div id="view">
         <img id="shot" alt="" hidden>
         <canvas id="cur" width="108" height="108" hidden></canvas>
         <div id="ring"></div>
-        <div id="idle">the fly takes the mouse when you press START</div>
+        <div id="idle">the worm takes the mouse when you press START</div>
       </div>
     </section>
 
@@ -165,7 +165,7 @@
   <div class="foot">
     <div class="tele">
       <div class="cell"><div class="k">Step</div><div class="v" id="t-step">&mdash;</div></div>
-      <div class="cell"><div class="k">Filled by fly</div><div class="v" id="t-fields">0 <small>/ 3</small></div></div>
+      <div class="cell"><div class="k">Filled by worm</div><div class="v" id="t-fields">0 <small>/ 3</small></div></div>
       <div class="cell"><div class="k">Target</div><div class="v" id="t-target" style="font-size:18px">&mdash;</div></div>
       <div class="cell"><div class="k">Spikes</div><div class="v" id="t-spikes">0</div></div>
       <div class="cell"><div class="k">Outcome</div><div class="v" id="t-out" style="font-size:12px">idle</div></div>
@@ -186,8 +186,8 @@ function stage(k,state){const e=$('st-'+k);if(!e)return;
   e.classList.remove('on','done');if(state)e.classList.add(state);}
 function stageDone(k){stage(k,'done');}
 
-const DNS=[['DNa02 L','steer_L'],['DNa02 R','steer_R'],['DNa01','fwd_L'],
-           ['MDN','back'],['DNp09','stop']];
+const DNS=[['AVA','AVA'],['AVB','AVB'],['PVC','PVC'],
+           ['forward','forward'],['backward','backward']];
 const dnEl={};
 DNS.forEach(function(p){const lbl=p[0],k=p[1];
   const d=document.createElement('div');d.className='dn';
@@ -205,7 +205,7 @@ fetch('/status').then(r=>r.json()).then(s=>{
     : 'no wallet';
   if(s.venue){ document.querySelector('.hd .t').textContent='Live — '+s.venue; }
   if(s.chain){ document.querySelector('.brand .tag').textContent=
-    'Drosophila melanogaster · ' + s.chain; }
+    'Caenorhabditis elegans · ' + s.chain;
   const m=$('mode');
   m.textContent = s.live ? 'LIVE — will mint' : 'DRY RUN';
   m.className = 'chip ' + (s.live ? 'live' : 'dry');
@@ -221,7 +221,7 @@ fetch('/status').then(r=>r.json()).then(s=>{
    and the panel says so - rearranging those into a silhouette would turn
    measurements into decoration. But the IDLE animation is not data: it is
    spontaneous flicker to keep the panel alive while the connectome loads and
-   pump.fun opens. So the idle state gets a fly built from the same dots, and
+   ponsfamily.com/launchpad opens. So the idle state gets a worm built from the same dots, and
    the moment real spikes arrive it cuts to the actual anatomy.
 --------------------------------------------------------------------------- */
 let FLY=null;
@@ -280,7 +280,7 @@ fetch('/neurons').then(async r=>{
   const cx=(a[0]+a[1])/2,cy=(a[2]+a[3])/2,cz=(a[4]+a[5])/2,s=(a[5]-a[4])/2;
   for(let i=0;i<n;i++){px[i]=(XYZ[i*3]-cx)/s;py[i]=(XYZ[i*3+1]-cy)/s;pz[i]=(XYZ[i*3+2]-cz)/s;}
   FLY=buildFly(n);
-  $('ncount').textContent=n.toLocaleString()+' of 165,122 sampled';
+  $('ncount').textContent=n.toLocaleString()+' of 302 sampled';
   fit();log('connectome loaded — '+n.toLocaleString()+' neurons at measured coordinates');
 });
 
@@ -313,7 +313,7 @@ draw();
 
 /* A brain is never silent. Keep a low spontaneous flicker so the panel is alive
    from the first frame, instead of a dead black box for the 20s it takes the
-   connectome to load and pump.fun to open. */
+   connectome to load and ponsfamily.com/launchpad to open. */
 setInterval(function(){
   if(!N)return;
   for(let i=0;i<N;i++)heat[i]*=0.955;
@@ -331,7 +331,7 @@ function baseline(on){
   if(on){ u.textContent='spontaneous baseline'; $('firing').style.opacity='.55';
           $('ncount').textContent='idle — spontaneous activity'; }
   else  { u.textContent='neurons firing';       $('firing').style.opacity='1';
-          $('ncount').textContent='11,000 of 165,122 at measured coordinates'; }
+          $('ncount').textContent='0 of 302 — no 3D soma coordinates loaded yet';
 }
 
 let ws=null;
@@ -348,8 +348,8 @@ $('start').onclick=function(){
     baseline(true);log('closed');};
 };
 
-/* The pointer is a fly. Its position is the real thing - whatever DNa02,
-   DNa01, MDN and DNp09 did with what the fly saw - so only the glyph is
+/* The pointer is a worm. Its position is the real thing - whatever AVA,
+   AVB and PVC did with what the worm sensed - so only the glyph is
    decorative. It banks toward its heading and beats its wings while it moves,
    and settles when it stops. */
 let curNow=null, curTo=null, curAng=0, wingT=0;
@@ -452,7 +452,7 @@ function handle(m){
     if(m.connected)stageDone('wallet');return;}
   if(m.type==='fields'){const f=m.by_fly||[],r=m.by_rig||[];
     $('t-fields').innerHTML=f.length+' <small>/ 3</small>';
-    log('by FLY: '+(f.join(', ')||'none')+(r.length?'  ·  by rig: '+r.join(', '):''));
+    log('by WORM: '+(f.join(', ')||'none')+(r.length?'  ·  by rig: '+r.join(', '):''));
     stageDone('fill');baseline(true);return;}
   if(m.type==='step'){
     paint(m.shot);
