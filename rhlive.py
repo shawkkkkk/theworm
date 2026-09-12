@@ -61,11 +61,20 @@ def browser_allowed():
 def boot():
     wb = WormBrain()
     pilot = WormPilot(wb)
-    xyz = np.zeros((0, 3), dtype=np.float32)
-    grp = np.zeros((0,), dtype=np.uint8)
+
+    pos = np.load(ROOT / "build" / "positions.npz", allow_pickle=True)
+    pos_names = list(pos["neurons"])
+    xyz = pos["xyz"].astype(np.float32)
+    assert pos_names == wb.neurons, "positions.npz / graph.npz neuron order mismatch"
+
+    grp = np.zeros(wb.n, dtype=np.uint8)
+    grp[wb.idx(["ASEL", "ASER"])] = 1
+    grp[wb.idx(["AVAL", "AVAR", "AVBL", "AVBR", "PVCL", "PVCR"])] = 2
+
     STATE.update(brain=wb, pilot=pilot,
-                 remap=np.full(wb.n, -1, dtype=np.int32), xyz=xyz, grp=grp)
-    print(f"brain ready: {wb.n} neurons (worm)")
+                 remap=np.arange(wb.n, dtype=np.int32),
+                 xyz=xyz, grp=grp)
+    print(f"brain ready: {wb.n} neurons (worm), all at real measured coordinates")
 
 
 @app.get("/")
@@ -534,10 +543,14 @@ async def set_creator_tax(page, pct, send=None, shot=None):
         return False
 
 
-def step_brain(pilot, img, cx, cy, gains, seed):
+def step_brain(pilot, img, cx, cy, gains, seed, threshold=0.02):
     dx, dy, click, hz = pilot.step(img, cx, cy)
-    fired = np.array([], dtype=np.int32)
-    return dx, dy, click, hz, fired
+    # Our worm model doesn't spike -- it has continuous activity, unlike the
+    # fly's LIF sim. "Fired" here means "activity magnitude currently above
+    # a threshold," a genuine readout of the real simulation state, not a
+    # real spike event. Flagging that distinction, same as everywhere else.
+    active = np.flatnonzero(np.abs(pilot.brain.activity) > threshold).astype(np.int32)
+    return dx, dy, click, hz, active
 
 
 async def run_episode(ws, coin, steps, seed, headful):

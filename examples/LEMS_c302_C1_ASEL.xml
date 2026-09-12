@@ -1,0 +1,162 @@
+<Lems>
+    
+    <!--
+
+
+Parameters and setting used to generate this network:
+
+    Data reader:                    cect.readers.SpreadsheetDataReader
+    c302 version:                   0.12.0
+    cect version:                   0.3.1
+    owmeta version:                 - not installed -
+    owmeta_core version:            - not installed -
+    Cells:                          ['ASEL', 'ASER', 'AWCL', 'AWCR', 'AIBL', 'AIBR', 'AIYL', 'AIYR', 'ASHL', 'ASHR', 'AVAL', 'AVAR', 'AVBL', 'AVBR', 'PVCL', 'PVCR']
+    Cell stimulated:                ['ASEL', 'ASER']
+    Connection:                     []
+    Connection numbers overridden:  None
+    Connection numbers scaled:      None
+    Connection polarities override: None
+    Muscles:                        []
+
+    Known BioParameters:
+        BioParameter: ca_boyle_erev = 40 mV (SRC: BlindGuess, certainty 0.1)
+        BioParameter: ca_conc_decay_time = 11.5943 ms (SRC: BlindGuess, certainty 0.1)
+        BioParameter: ca_conc_rho = 0.000238919 mol_per_m_per_A_per_s (SRC: BlindGuess, certainty 0.1)
+        BioParameter: cell_diameter = 5 (SRC: BlindGuess, certainty 0.1)
+        BioParameter: exc_syn_delta = 5 mV (SRC: BlindGuess, certainty 0.1)
+        BioParameter: exc_syn_erev = 0 mV (SRC: BlindGuess, certainty 0.1)
+        BioParameter: exc_syn_k = 0.025per_ms (SRC: BlindGuess, certainty 0.1)
+        BioParameter: exc_syn_vth = 0 mV (SRC: BlindGuess, certainty 0.1)
+        BioParameter: inh_syn_delta = 5 mV (SRC: BlindGuess, certainty 0.1)
+        BioParameter: inh_syn_erev = -70 mV (SRC: BlindGuess, certainty 0.1)
+        BioParameter: inh_syn_k = 0.025per_ms (SRC: BlindGuess, certainty 0.1)
+        BioParameter: inh_syn_vth = 0 mV (SRC: BlindGuess, certainty 0.1)
+        BioParameter: initial_memb_pot = -45 mV (SRC: BlindGuess, certainty 0.1)
+        BioParameter: k_fast_erev = -60 mV (SRC: BlindGuess, certainty 0.1)
+        BioParameter: k_slow_erev = -60 mV (SRC: BlindGuess, certainty 0.1)
+        BioParameter: leak_erev = -50 mV (SRC: BlindGuess, certainty 0.1)
+        BioParameter: muscle_ca_boyle_cond_density = 0.0007 S_per_cm2 (SRC: BlindGuess, certainty 0.1)
+        BioParameter: muscle_k_fast_cond_density = 0.0001 S_per_cm2 (SRC: BlindGuess, certainty 0.1)
+        BioParameter: muscle_k_slow_cond_density = 0.0006 S_per_cm2 (SRC: BlindGuess, certainty 0.1)
+        BioParameter: muscle_leak_cond_density = 5e-7 S_per_cm2 (SRC: BlindGuess, certainty 0.1)
+        BioParameter: muscle_length = 20 (SRC: BlindGuess, certainty 0.1)
+        BioParameter: muscle_spike_thresh = -20 mV (SRC: BlindGuess, certainty 0.1)
+        BioParameter: neuron_ca_boyle_cond_density = 3 mS_per_cm2 (SRC: BlindGuess, certainty 0.1)
+        BioParameter: neuron_k_fast_cond_density = 0.0711643917483308 mS_per_cm2 (SRC: BlindGuess, certainty 0.1)
+        BioParameter: neuron_k_slow_cond_density = 3 mS_per_cm2 (SRC: BlindGuess, certainty 0.1)
+        BioParameter: neuron_leak_cond_density = 0.005 mS_per_cm2 (SRC: BlindGuess, certainty 0.1)
+        BioParameter: neuron_spike_thresh = -20 mV (SRC: BlindGuess, certainty 0.1)
+        BioParameter: neuron_to_muscle_elec_syn_gbase = 0.00052 nS (SRC: BlindGuess, certainty 0.1)
+        BioParameter: neuron_to_muscle_exc_syn_conductance = 0.09 nS (SRC: BlindGuess, certainty 0.1)
+        BioParameter: neuron_to_muscle_inh_syn_conductance = 0.09 nS (SRC: BlindGuess, certainty 0.1)
+        BioParameter: neuron_to_neuron_elec_syn_gbase = 0.00052 nS (SRC: BlindGuess, certainty 0.1)
+        BioParameter: neuron_to_neuron_exc_syn_conductance = 0.09 nS (SRC: BlindGuess, certainty 0.1)
+        BioParameter: neuron_to_neuron_inh_syn_conductance = 0.09 nS (SRC: BlindGuess, certainty 0.1)
+        BioParameter: specific_capacitance = 1 uF_per_cm2 (SRC: BlindGuess, certainty 0.1)
+        BioParameter: unphysiological_offset_current = 5pA (SRC: ASEL/ASER stimulus, certainty 0)
+        BioParameter: unphysiological_offset_current_del = 100ms (SRC: ASEL/ASER stimulus, certainty 0)
+        BioParameter: unphysiological_offset_current_dur = 600ms (SRC: ASEL/ASER stimulus, certainty 0)
+
+   
+    -->
+
+    <Target component="sim_c302_C1_ASEL" />
+
+    <!-- Include core NeuroML2 ComponentType definitions -->
+
+    <Include file="Cells.xml" />
+    <Include file="Networks.xml" />
+    <Include file="Simulation.xml" />
+    
+    <Include file="cell_C.xml" />
+    
+    <Include file="c302_C1_ASEL.net.nml" />
+
+    <!-- End of NeuroML2 content -->
+    
+
+    <Simulation id="sim_c302_C1_ASEL" length="800ms" step="0.05ms" target="c302_C1_ASEL">
+
+        <Display id="neurons" title="c302_C1_ASEL: Membrane potential of a number of neurons" timeScale="1ms" xmin="-80.0" xmax="880.0000000000001" ymin="-60" ymax="25">
+            
+            <Line id="AIBL" quantity="AIBL/0/GenericNeuronCell/v" scale="1mV" color="#e13b00" timeScale="1ms" />
+            <Line id="AIBR" quantity="AIBR/0/GenericNeuronCell/v" scale="1mV" color="#32b579" timeScale="1ms" />
+            <Line id="AIYL" quantity="AIYL/0/GenericNeuronCell/v" scale="1mV" color="#b1f7ed" timeScale="1ms" />
+            <Line id="AIYR" quantity="AIYR/0/GenericNeuronCell/v" scale="1mV" color="#3a00f9" timeScale="1ms" />
+            <Line id="ASEL" quantity="ASEL/0/GenericNeuronCell/v" scale="1mV" color="#232d17" timeScale="1ms" />
+            <Line id="ASER" quantity="ASER/0/GenericNeuronCell/v" scale="1mV" color="#f6b588" timeScale="1ms" />
+            <Line id="ASHL" quantity="ASHL/0/GenericNeuronCell/v" scale="1mV" color="#002400" timeScale="1ms" />
+            <Line id="ASHR" quantity="ASHR/0/GenericNeuronCell/v" scale="1mV" color="#c1551b" timeScale="1ms" />
+            <Line id="AVAL" quantity="AVAL/0/GenericNeuronCell/v" scale="1mV" color="#266e49" timeScale="1ms" />
+            <Line id="AVAR" quantity="AVAR/0/GenericNeuronCell/v" scale="1mV" color="#489ce8" timeScale="1ms" />
+            <Line id="AVBL" quantity="AVBL/0/GenericNeuronCell/v" scale="1mV" color="#145a8b" timeScale="1ms" />
+            <Line id="AVBR" quantity="AVBR/0/GenericNeuronCell/v" scale="1mV" color="#ed15c5" timeScale="1ms" />
+            <Line id="AWCL" quantity="AWCL/0/GenericNeuronCell/v" scale="1mV" color="#eff317" timeScale="1ms" />
+            <Line id="AWCR" quantity="AWCR/0/GenericNeuronCell/v" scale="1mV" color="#e0978c" timeScale="1ms" />
+            <Line id="PVCL" quantity="PVCL/0/GenericNeuronCell/v" scale="1mV" color="#df3d34" timeScale="1ms" />
+            <Line id="PVCR" quantity="PVCR/0/GenericNeuronCell/v" scale="1mV" color="#62b037" timeScale="1ms" />
+            
+        </Display>
+      
+        <Display id="activity_neurons" title="c302_C1_ASEL: Activity of a number of neurons" timeScale="1ms" xmin="-80.0" xmax="880.0000000000001" ymin="-0.1" ymax="1.1">
+            
+            <Line id="AIBL" quantity="AIBL/0/GenericNeuronCell/caConc" scale="1" color="#2e112a" timeScale="1ms" />
+            <Line id="AIBR" quantity="AIBR/0/GenericNeuronCell/caConc" scale="1" color="#000000" timeScale="1ms" />
+            <Line id="AIYL" quantity="AIYL/0/GenericNeuronCell/caConc" scale="1" color="#4c2e5d" timeScale="1ms" />
+            <Line id="AIYR" quantity="AIYR/0/GenericNeuronCell/caConc" scale="1" color="#7f21ee" timeScale="1ms" />
+            <Line id="ASEL" quantity="ASEL/0/GenericNeuronCell/caConc" scale="1" color="#8a209a" timeScale="1ms" />
+            <Line id="ASER" quantity="ASER/0/GenericNeuronCell/caConc" scale="1" color="#7f66e8" timeScale="1ms" />
+            <Line id="ASHL" quantity="ASHL/0/GenericNeuronCell/caConc" scale="1" color="#aa49f2" timeScale="1ms" />
+            <Line id="ASHR" quantity="ASHR/0/GenericNeuronCell/caConc" scale="1" color="#27fe53" timeScale="1ms" />
+            <Line id="AVAL" quantity="AVAL/0/GenericNeuronCell/caConc" scale="1" color="#00b138" timeScale="1ms" />
+            <Line id="AVAR" quantity="AVAR/0/GenericNeuronCell/caConc" scale="1" color="#14d58d" timeScale="1ms" />
+            <Line id="AVBL" quantity="AVBL/0/GenericNeuronCell/caConc" scale="1" color="#4f994f" timeScale="1ms" />
+            <Line id="AVBR" quantity="AVBR/0/GenericNeuronCell/caConc" scale="1" color="#b2fdae" timeScale="1ms" />
+            <Line id="AWCL" quantity="AWCL/0/GenericNeuronCell/caConc" scale="1" color="#f157e1" timeScale="1ms" />
+            <Line id="AWCR" quantity="AWCR/0/GenericNeuronCell/caConc" scale="1" color="#3f5fd5" timeScale="1ms" />
+            <Line id="PVCL" quantity="PVCL/0/GenericNeuronCell/caConc" scale="1" color="#f8c082" timeScale="1ms" />
+            <Line id="PVCR" quantity="PVCR/0/GenericNeuronCell/caConc" scale="1" color="#50894f" timeScale="1ms" />
+
+        </Display>
+
+        <OutputFile id="neurons_v" fileName="c302_C1_ASEL.dat">
+            <OutputColumn id="AIBL_v" quantity="AIBL/0/GenericNeuronCell/v"/>
+            <OutputColumn id="AIBR_v" quantity="AIBR/0/GenericNeuronCell/v"/>
+            <OutputColumn id="AIYL_v" quantity="AIYL/0/GenericNeuronCell/v"/>
+            <OutputColumn id="AIYR_v" quantity="AIYR/0/GenericNeuronCell/v"/>
+            <OutputColumn id="ASEL_v" quantity="ASEL/0/GenericNeuronCell/v"/>
+            <OutputColumn id="ASER_v" quantity="ASER/0/GenericNeuronCell/v"/>
+            <OutputColumn id="ASHL_v" quantity="ASHL/0/GenericNeuronCell/v"/>
+            <OutputColumn id="ASHR_v" quantity="ASHR/0/GenericNeuronCell/v"/>
+            <OutputColumn id="AVAL_v" quantity="AVAL/0/GenericNeuronCell/v"/>
+            <OutputColumn id="AVAR_v" quantity="AVAR/0/GenericNeuronCell/v"/>
+            <OutputColumn id="AVBL_v" quantity="AVBL/0/GenericNeuronCell/v"/>
+            <OutputColumn id="AVBR_v" quantity="AVBR/0/GenericNeuronCell/v"/>
+            <OutputColumn id="AWCL_v" quantity="AWCL/0/GenericNeuronCell/v"/>
+            <OutputColumn id="AWCR_v" quantity="AWCR/0/GenericNeuronCell/v"/>
+            <OutputColumn id="PVCL_v" quantity="PVCL/0/GenericNeuronCell/v"/>
+            <OutputColumn id="PVCR_v" quantity="PVCR/0/GenericNeuronCell/v"/>
+        </OutputFile>
+        
+        <OutputFile id="neurons_activity" fileName="c302_C1_ASEL.activity.dat">
+            <OutputColumn id="AIBL_v" quantity="AIBL/0/GenericNeuronCell/caConc"/>
+            <OutputColumn id="AIBR_v" quantity="AIBR/0/GenericNeuronCell/caConc"/>
+            <OutputColumn id="AIYL_v" quantity="AIYL/0/GenericNeuronCell/caConc"/>
+            <OutputColumn id="AIYR_v" quantity="AIYR/0/GenericNeuronCell/caConc"/>
+            <OutputColumn id="ASEL_v" quantity="ASEL/0/GenericNeuronCell/caConc"/>
+            <OutputColumn id="ASER_v" quantity="ASER/0/GenericNeuronCell/caConc"/>
+            <OutputColumn id="ASHL_v" quantity="ASHL/0/GenericNeuronCell/caConc"/>
+            <OutputColumn id="ASHR_v" quantity="ASHR/0/GenericNeuronCell/caConc"/>
+            <OutputColumn id="AVAL_v" quantity="AVAL/0/GenericNeuronCell/caConc"/>
+            <OutputColumn id="AVAR_v" quantity="AVAR/0/GenericNeuronCell/caConc"/>
+            <OutputColumn id="AVBL_v" quantity="AVBL/0/GenericNeuronCell/caConc"/>
+            <OutputColumn id="AVBR_v" quantity="AVBR/0/GenericNeuronCell/caConc"/>
+            <OutputColumn id="AWCL_v" quantity="AWCL/0/GenericNeuronCell/caConc"/>
+            <OutputColumn id="AWCR_v" quantity="AWCR/0/GenericNeuronCell/caConc"/>
+            <OutputColumn id="PVCL_v" quantity="PVCL/0/GenericNeuronCell/caConc"/>
+            <OutputColumn id="PVCR_v" quantity="PVCR/0/GenericNeuronCell/caConc"/>
+        </OutputFile>
+    </Simulation>
+
+
+</Lems>
