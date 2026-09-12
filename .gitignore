@@ -14,6 +14,11 @@ __pycache__/
 *.pyc
 *.mp4
 *.webm
+*.safetensors
+
+# Worm Language Model downloads and trained artifacts
+worm_language_model/cache/
+worm_language_model/runs/
 
 # trained gains are small and reproducible, but they ARE a result - keep them
 !build/gains_ui.npz

@@ -132,6 +132,14 @@ ul.plain li b{color:var(--ink);font-weight:600}
 
 footer{padding:44px 0 70px;color:var(--ink-dim);font-size:14.5px}
 footer .links{display:flex;flex-wrap:wrap;gap:22px;margin-bottom:20px}
+.project-nav{
+  position:absolute;z-index:5;top:18px;left:50%;transform:translateX(-50%);
+  width:min(980px,calc(100% - 48px));display:flex;justify-content:space-between;
+  gap:18px;align-items:center;font-family:var(--mono);font-size:11px;
+  letter-spacing:.12em;text-transform:uppercase
+}
+.project-nav a{padding:7px 10px;background:rgba(6,7,10,.78);backdrop-filter:blur(8px)}
+@media (max-width:600px){.project-nav{align-items:flex-start;flex-direction:column}.tr{display:none}}
 .pill{
   display:inline-flex;align-items:center;gap:8px;font-size:12.5px;font-family:var(--mono);
   border:1px solid var(--line);border-radius:999px;padding:5px 12px;color:var(--ink-dim);
@@ -342,6 +350,11 @@ footer .links{display:flex;flex-wrap:wrap;gap:22px;margin-bottom:20px}
 </head>
 <body>
 
+<nav class="project-nav" aria-label="TheWorm projects">
+  <a href="https://github.com/shawkkkkk/theworm">TheWorm · work in progress</a>
+  <a href="/wlm">Worm Language Model →</a>
+</nav>
+
 <div class="plate">
   <canvas id="fly" aria-label="A fruit fly drawn as a cloud of points"></canvas>
   <div class="corner tl">specimen<br><span style="color:var(--ink-dim)">male CNS v1.0</span></div>
@@ -549,9 +562,21 @@ footer .links{display:flex;flex-wrap:wrap;gap:22px;margin-bottom:20px}
   </div>
 </section>
 
+<section id="worm-language-model">
+  <div class="wrap">
+    <div class="eyebrow">side experiment · phase 1</div>
+    <h2>Worm Language Model</h2>
+    <p class="lede">A frozen language model, a fixed 302-neuron <em>C. elegans</em> connectome reservoir, and a small trainable adapter.</p>
+    <p>The Cook 2019 graph and its causal controls are working. The language adapter has not been trained, so the chat is deliberately disabled rather than filled with a fake worm response.</p>
+    <p><a href="/wlm">Open the WLM lab →</a></p>
+  </div>
+</section>
+
 <footer>
   <div class="wrap">
     <div class="links">
+      <a href="/wlm">WLM lab</a>
+      <a href="https://github.com/shawkkkkk/theworm">TheWorm source</a>
       <a href="https://github.com/fruitflydev/flycoinrh">source</a>
       <a href="https://x.com/fruitflydev">@fruitflydev</a>
       <a id="f-scan" href="https://robinhoodchain.blockscout.com">explorer</a>

@@ -19,6 +19,8 @@ The planned token is **The Worm** (`TheWorm`), paired with **PFE**. That pairing
 | Run a 16-cell c302 C1 ASEL/ASER stimulation experiment | Working; output traces are committed |
 | Run a custom 302-node continuous-activity controller | Prototype implemented; not biologically validated |
 | Map the controller to cursor movement in Chromium | Prototype integrated |
+| Run the Cook 2019 graph as a fixed language-model reservoir | Working; 302-node graph and causal controls tested |
+| Train and evaluate a Worm Language Model adapter | **Not done**; there is no working WLM chat yet |
 | Run the launch flow safely in dry-run mode | In development |
 | Launch TheWorm | **Not done** |
 
@@ -57,6 +59,17 @@ The c302 experiment is **not** currently the browser controller. The browser use
 Chemical connections in the custom controller are assigned deterministic random positive or negative signs because the Cook connection matrix alone does not provide every functional sign needed by this simplified model. Therefore, this should be described as a **connectome-based controller prototype**, not a complete biological simulation of the worm.
 
 The interface currently labels above-threshold continuous activity as “neurons firing.” The model does not produce experimentally measured spike events; that label will be changed to “active neurons.”
+
+## Side project: Worm Language Model
+
+The repository now includes the first verified component of a **Worm Language Model (WLM)** experiment: the 302-neuron Cook 2019 connectome running as a fixed recurrent reservoir. It supports an intact graph, a no-edges control, a shuffled-connectome control, deterministic reset, and causal sequence tests.
+
+The connectome is **not a standalone language model**. The proposed architecture uses a frozen conventional language model for tokenization and language representations, sends those representations through the fixed worm reservoir, and trains a small bounded adapter to adjust the model's next-token scores. Only that adapter would be trained.
+
+The website's WLM page is therefore a build-status preview, not a simulated chat. It will remain disabled until a real adapter has been trained and compared with controls that can show whether the worm wiring contributes anything beyond an ordinary projection.
+
+- [Read the WLM design, controls, and run instructions](worm_language_model/README.md)
+- [Open the website preview](site/web/wlm.html)
 
 ## Why Alzheimer’s and PFE?
 
@@ -188,12 +201,14 @@ Open port `4651` from the Codespaces port panel. With `FLY_RH_LIVE=0`, the rig m
 7. Demonstrate the complete workflow on a local fake launch page.
 8. Run an auditable Robinhood Chain dry run/test environment.
 9. Consider one human-approved live launch only after every earlier milestone is reproducible.
+10. Train and evaluate the WLM adapter against no-edges, shuffled-connectome, and direct-input baselines before enabling its chat interface.
 
 ## Sources and acknowledgements
 
 - Cook SJ et al. (2019), [“Whole-animal connectomes of both *Caenorhabditis elegans* sexes”](https://pubmed.ncbi.nlm.nih.gov/31270481/), *Nature* 571:63–71.
 - OpenWorm’s [C. elegans Connectome Toolbox](https://github.com/openworm/ConnectomeToolbox), used through `cect` and `Cook2019HermReader`.
 - OpenWorm’s [c302 framework](https://github.com/openworm/c302), used for the NeuroML dynamics experiment and neuron-coordinate extraction.
+- Alex Wormuth's [Fly Language Model](https://github.com/nftechie/flm), whose frozen-language-model, fixed-connectome-reservoir, and trained-readout structure inspired the WLM side experiment. Its MIT notice is reproduced in `worm_language_model/THIRD_PARTY_NOTICES.md`.
 - The browser, wallet, and Robinhood Chain foundation began from [fruitflydev/flycoinrh](https://github.com/fruitflydev/flycoinrh). Its MIT attribution remains in `LICENSE` and `NOTICE`.
 - Robinhood Chain network details are documented by [Robinhood Chain](https://docs.robinhood.com/chain/deploy-smart-contracts/).
 
